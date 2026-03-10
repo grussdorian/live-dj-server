@@ -1,0 +1,42 @@
+name: Restart service on main
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  restart:
+    name: Restart service
+    runs-on: [self-hosted, linux]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Copy env file
+        run: |
+          if [ -f env/live-dj-server/.env ]; then
+            cp env/live-dj-server/.env .env
+            echo ".env copied"
+          else
+            echo "No env file to copy at env/live-dj-server/.env"
+          fi
+
+      - name: Install dependencies
+        run: npm i
+        env:
+          NODE_ENV: production
+      - name: Restart server
+        # first stop the server then start it
+        # stop the already running server (if any)
+        run: |
+          echo "Stopping existing server (if any)..."
+          pkill -f "node src/server.js" || echo "No existing server process found."
+          echo "Starting server..."
+          npm start
+        env:
+          NODE_ENV: production
