@@ -32,25 +32,16 @@ jobs:
         env:
           NODE_ENV: production
 
-      - name: Install PM2 globally (first run only)
-        run: |
-          if ! command -v pm2 &> /dev/null; then
-            echo "PM2 not found, installing..."
-            npm install pm2
-          else
-            echo "PM2 already installed"
-          fi
-
       - name: Restart server with PM2
         run: |
-          if pm2 list | grep -q "live-dj"; then
+          if npx pm2 list | grep -q "live-dj-server"; then
             echo "Restarting existing PM2 process..."
-            pm2 restart live-dj
+            npx pm2 restart live-dj-server
           else
             echo "Starting new PM2 process..."
-            pm2 start src/server.js --name live-dj
+            npx pm2 start src/server.js --name live-dj-server --watch --ignore-watch="node_modules"
           fi
 
-          pm2 save
+          npx pm2 save
         env:
           NODE_ENV: production
