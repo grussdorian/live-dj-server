@@ -13,25 +13,57 @@ if(document.getElementById('trackUrl')){
   const msg = document.getElementById('msg');
   let currentTrack = null;
 
+  // sanitize input on change/enter
   urlInput.addEventListener('change', validate);
   urlInput.addEventListener('keyup', (e)=>{ if(e.key==='Enter') validate(); });
-  sendButton.addEventListener('click', async ()=>{
-    // if no validated track, validate first
-    if(!currentTrack) await validate();
-    if(!currentTrack) return;
-    const r = await api('/api/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uri:currentTrack.uri})});
-    if(r.ok){ msg.textContent='Request sent!'; document.querySelector('.topbar a').style.display='inline-block'; currentTrack = null; preview.innerHTML=''; }
-    else msg.textContent=r.error||'Failed';
-  });
+  sendButton.addEventListener('click', async ()=>{ await sendCurrent(); });
+
+  // helper to sanitize and normalize user input
+  function sanitizeInput(v){
+    if(!v) return '';
+    v = v.trim();
+    // remove surrounding <> or quotes
+    v = v.replace(/^<|>$/g, '');
+    v = v.replace(/^"|"$/g, '');
+    v = v.replace(/^'|'$/g, '');
+    return v;
+  }
+
+  // send current track if validated
+  let sending = false;
+  async function sendCurrent(){
+    if(sending) return;
+    if(!currentTrack) {
+      await validate();
+      if(!currentTrack) return;
+    }
+    sending = true;
+    sendButton.disabled = true;
+    msg.textContent = 'Sending...';
+    try{
+      const r = await api('/api/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uri:currentTrack.uri})});
+      if(r.ok){ msg.textContent='Request sent!'; document.querySelector('.topbar a').style.display='inline-block'; }
+      else { msg.textContent = r.error || 'Failed'; }
+    }catch(e){ msg.textContent = e.message || 'Failed'; }
+    sending = false;
+    sendButton.disabled = false;
+  }
 
   async function validate(){
-    const url = urlInput.value.trim(); if(!url) return;
+    const raw = urlInput.value || '';
+    const url = sanitizeInput(raw);
+    if(!url) return;
     preview.innerHTML='Loading...'; actions.innerHTML=''; msg.textContent='';
     const res = await api('/api/validate?url='+encodeURIComponent(url));
     if(!res.ok){ preview.innerHTML=''; msg.textContent=res.error||'Invalid'; currentTrack = null; return }
     const t = res.track;
+    // normalize to spotify:track:ID
+    t.uri = t.uri || ('spotify:track:'+t.id);
     currentTrack = t;
+    // only show album cover when track found
     preview.innerHTML = `<div class="track"><div class="thumb" style="background-image:url(${t.albumImage});background-size:cover"></div><div class="meta"><div><strong>${t.title}</strong></div><div class="muted small">${t.artists}</div></div></div>`;
+    // auto-send once preview shown
+    await sendCurrent();
   }
 }
 

@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const env = process.env.NODE_ENV || 'dev';
 const LOCAL_URL = process.env.LOCAL_URL || 'localhost';
 const PORT = process.env.PORT || 3000;
+const RATE_LIMIT = process.env.RATE_LIMIT || 4; // max requests per minute per IP
 // robust fetch import: prefer global fetch (Node 18+), otherwise try node-fetch (v2 or v3)
 let fetch;
 try {
@@ -365,7 +366,7 @@ async function checkRateLimit(ip) {
 	if (now === 1) {
 		await redis.expire(key, 60);
 	}
-	return now <= 3;
+	return now <= RATE_LIMIT;
 }
 
 // API routes
@@ -388,7 +389,7 @@ app.post('/api/request', async (req, res) => {
 		const ip = req.ip || req.connection.remoteAddress;
 		// rate limit per IP
 		const allowed = await checkRateLimit(ip);
-		if (!allowed) return res.status(429).json({ ok: false, error: 'Rate limit exceeded' });
+		if (!allowed) return res.status(429).json({ ok: false, error: 'Too many song requests — try again in a minute' });
 
 		const payload = req.body || {};
 		const rawInput = payload.url || payload.uri || payload.track || payload.trackUrl || payload.trackUri || payload.id || payload.trackId || '';
@@ -411,6 +412,11 @@ app.post('/api/request', async (req, res) => {
 			if (addRes.ok) item.spotifyAddedToRequests = true;
 			else { item.spotifyAddedToRequests = false; item.spotifyError = addRes.error; console.warn('add to requests playlist failed', addRes.error); }
 		}
+
+		// Re-check duplicates immediately before enqueueing to avoid race conditions
+		const nowInReq = await redis.sIsMember(REDIS_REQ_SET, info.id);
+		const nowInLive = await redis.sIsMember(REDIS_LIVE_SET, info.id);
+		if (nowInReq || nowInLive) return res.status(409).json({ ok: false, error: 'Track already requested or already in live' });
 
 		await redis.rPush(REDIS_REQ_KEY, JSON.stringify(item));
 		await redis.sAdd(REDIS_REQ_SET, info.id);
