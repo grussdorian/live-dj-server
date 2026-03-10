@@ -41,7 +41,6 @@ jobs:
             echo "Starting new PM2 process..."
             npx pm2 start src/server.js --name live-dj-server --watch --ignore-watch="node_modules"
           fi
-
           npx pm2 save
         env:
           NODE_ENV: production
