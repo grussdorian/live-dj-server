@@ -934,5 +934,5 @@ app.use((req, res) => {
 	res.status(404).sendFile(path.join(__dirname, '..', 'public', '404.html'));
 });
 
-server.listen(PORT, () => console.log(`Server listening on ${PORT} and url ${LOCAL_URL}`));
+server.listen(PORT, () => console.log(`Server listening on ${PORT}`));
 

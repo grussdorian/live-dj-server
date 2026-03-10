@@ -19,11 +19,11 @@ jobs:
 
       - name: Copy env file
         run: |
-          if [ -f env/live-dj-server/.env ]; then
-            cp env/live-dj-server/.env .env
+          if [ -f /env/live-dj-server/.env ]; then
+            cp /env/live-dj-server/.env .env
             echo ".env copied"
           else
-            echo "No env file to copy at env/live-dj-server/.env"
+            echo "No env file to copy at /env/live-dj-server/.env"
           fi
 
       - name: Install dependencies
