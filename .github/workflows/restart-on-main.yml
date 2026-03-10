@@ -36,7 +36,7 @@ jobs:
         run: |
           if ! command -v pm2 &> /dev/null; then
             echo "PM2 not found, installing..."
-            sudo npm install -g pm2
+            npm install pm2
           else
             echo "PM2 already installed"
           fi
