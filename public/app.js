@@ -31,8 +31,13 @@ if(document.getElementById('trackUrl')){
 
   // send current track if validated
   let sending = false;
+  let pendingTimer = null;
+  let countdownInterval = null;
   async function sendCurrent(){
     if(sending) return;
+    // clear pending countdown if user manually sends
+    if (pendingTimer) { clearTimeout(pendingTimer); pendingTimer = null; }
+    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
     if(!currentTrack) {
       await validate();
       if(!currentTrack) return;
@@ -42,14 +47,25 @@ if(document.getElementById('trackUrl')){
     msg.textContent = 'Sending...';
     try{
       const r = await api('/api/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uri:currentTrack.uri})});
-      if(r.ok){ msg.textContent='Request sent!'; document.querySelector('.topbar a').style.display='inline-block'; }
-      else { msg.textContent = r.error || 'Failed'; }
+      if(r.ok){
+        msg.textContent='Request sent!';
+        document.querySelector('.topbar a').style.display='inline-block';
+        // clear preview (album art disappears) after send
+        preview.innerHTML = '';
+        currentTrack = null;
+      } else {
+        msg.textContent = r.error || 'Failed';
+      }
     }catch(e){ msg.textContent = e.message || 'Failed'; }
     sending = false;
     sendButton.disabled = false;
   }
 
   async function validate(){
+    // clear any existing pending send
+    if (pendingTimer) { clearTimeout(pendingTimer); pendingTimer = null; }
+    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+
     const raw = urlInput.value || '';
     const url = sanitizeInput(raw);
     if(!url) return;
@@ -62,8 +78,20 @@ if(document.getElementById('trackUrl')){
     currentTrack = t;
     // only show album cover when track found
     preview.innerHTML = `<div class="track"><div class="thumb" style="background-image:url(${t.albumImage});background-size:cover"></div><div class="meta"><div><strong>${t.title}</strong></div><div class="muted small">${t.artists}</div></div></div>`;
-    // auto-send once preview shown
-    await sendCurrent();
+    // set a 3s countdown before auto-sending; show message and disable send button
+    let countdown = 3;
+    msg.textContent = `Sending in ${countdown}s...`;
+    sendButton.disabled = true;
+    countdownInterval = setInterval(()=>{
+      countdown -= 1;
+      if (countdown > 0) msg.textContent = `Sending in ${countdown}s...`;
+      else { clearInterval(countdownInterval); countdownInterval = null; }
+    }, 1000);
+    pendingTimer = setTimeout(async ()=>{
+      pendingTimer = null;
+      if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+      await sendCurrent();
+    }, 3000);
   }
 }
 
