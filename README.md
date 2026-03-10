@@ -1,4 +1,5 @@
-![Deployment passing](https://github.com/grussdorian/live-dj-server/actions/workflows/restart-on-main/badge.svg)
+![Deployment passing](https://github.com/grussdorian/live-dj-server/actions/workflows/restart-on-main.yml/badge.svg)
+
 
 # DJ Server
 
