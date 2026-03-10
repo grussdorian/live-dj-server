@@ -86,6 +86,8 @@ function verifyAdmin(req, res, next) {
 app.post('/api/admin/login', (req, res) => {
 	const { user, pass } = req.body || {};
 	if (user !== ADMIN_USER || pass !== ADMIN_PASS) return res.status(401).json({ ok: false, error: 'Invalid credentials' });
+  console.log(`Provided credentials: user=${user} pass=${pass ? pass.substring(0, 3) + '...' + pass.slice(-3) : '(empty)'}`);
+
 	const token = signAdminToken();
 	res.cookie('admin_jwt', token, { httpOnly: true, sameSite: 'lax' });
 	return res.json({ ok: true });
