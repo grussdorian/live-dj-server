@@ -1,0 +1,25 @@
+:root{
+  --bg:#0b0f14; --card:#0f1720; --muted:#98a0ad; --accent:#1db954;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:linear-gradient(180deg,#05060a 0%,#0b0f14 100%);color:#e6eef3;font-family:Inter,system-ui,Arial,Helvetica,sans-serif;display:flex;align-items:flex-start;justify-content:center;padding:24px}
+.container{max-width:760px;width:100%}
+.card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(2,6,23,.6)}
+.center{text-align:center}
+input[type=text]{width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+button{background:var(--accent);border:none;color:#fff;padding:10px 14px;border-radius:8px;cursor:pointer}
+.muted{color:var(--muted);font-size:13px}
+.track{display:flex;gap:12px;align-items:center}
+.thumb{width:64px;height:64px;border-radius:6px;flex:0 0 64px;background:#081018}
+.meta{flex:1}
+.list{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.list .item{display:flex;gap:12px;align-items:center;padding:8px;border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent)}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.small{font-size:13px}
+/* input row with send button */
+.inputRow{display:flex;gap:8px;align-items:center;margin-top:6px}
+.inputRow input[type=text]{flex:1}
+.inputRow button{flex:0 0 auto;padding:10px 12px}
+@media(max-width:460px){.thumb{width:52px;height:52px}}
+@media(max-width:460px){.inputRow{flex-direction:column;align-items:stretch}.inputRow button{width:100%}}

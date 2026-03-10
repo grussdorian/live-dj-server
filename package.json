@@ -1,0 +1,29 @@
+{
+  "name": "dj-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "axios": "^1.13.6",
+    "body-parser": "^2.2.2",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "firebase-admin": "^13.7.0",
+    "node-fetch": "^3.3.2",
+    "nodemon": "^3.1.14",
+    "redis": "^5.11.0",
+    "socket.io": "^4.8.3",
+    "spotify-web-api-node": "^5.0.2",
+    "jsonwebtoken": "^9.0.0",
+    "cookie-parser": "^1.4.6"
+  }
+}

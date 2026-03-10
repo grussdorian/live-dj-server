@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DJ Admin</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="topbar">
+        <h2>DJ Admin Panel</h2>
+        <a href="/" class="small muted">View Live</a>
+      </div>
+      <div id="adminArea">
+        <div id="loginBox">
+          <p class="muted">Admin login</p>
+          <input id="adminUser" type="text" placeholder="user" value="admin" />
+          <input id="adminPass" type="password" placeholder="password" />
+          <div style="height:8px"></div>
+          <button id="loginBtn">Sign In</button>
+        </div>
+        <div id="panel" style="display:none">
+          <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px"><button id="logoutBtn">Logout</button><div class="muted">Approve, Reject requests or Remove live tracks</div></div>
+          <div id="spotifyStatus" style="margin-bottom:12px"></div>
+          <h3>Requests</h3>
+          <div id="requests" class="list muted">Loading...</div>
+          <h3 style="margin-top:12px">Live</h3>
+          <div id="live" class="list muted">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/app.js"></script>
+  <script>
+    const socket = io();
+    async function checkAuth(){
+      const r = await fetch('/api/admin/me', {credentials:'include'});
+      const j = await r.json();
+      if (j && j.auth) showPanel(); else showLogin();
+    }
+    function showLogin(){ document.getElementById('loginBox').style.display='block'; document.getElementById('panel').style.display='none'; }
+    async function showPanel(){ document.getElementById('loginBox').style.display='none'; document.getElementById('panel').style.display='block'; socket.emit('get_requests'); socket.emit('get_live'); await refreshSpotifyStatus(); }
+
+    async function refreshSpotifyStatus(){
+      const el = document.getElementById('spotifyStatus'); el.innerHTML = 'Checking Spotify...';
+      try {
+        const r = await fetch('/api/spotify/status'); const j = await r.json();
+        if(!j.ok){ el.innerHTML = '<div class="muted">Spotify status unavailable</div>'; return }
+        const linked = j.linked;
+        const me = j.me;
+        const owner = j.playlistOwner;
+        const ownerMatch = j.ownerMatch;
+        el.innerHTML = `<div class="small">Spotify linked: <strong>${linked ? 'Yes' : 'No'}</strong></div>`;
+        if(linked && me){ el.innerHTML += `<div class="small">Authorized as: <strong>${me.display_name||''} (${me.id})</strong></div>`; }
+        if(owner){ el.innerHTML += `<div class="small">Playlist owner: <strong>${owner}</strong></div>`; }
+        if(linked && owner){
+          if(ownerMatch) el.innerHTML += `<div class="muted small">Owner matches playlist owner — OK</div>`;
+          else el.innerHTML += `<div class="muted small">Owner mismatch — re-link with playlist owner</div>`;
+        }
+        el.innerHTML += `<div style="margin-top:8px"><button id="relinkBtn">Re-link Spotify</button> <button id="clearLinkBtn" style="background:#b33">Clear Link</button> <button id="testWriteBtn" style="background:#383">Test Write</button></div>`;
+        el.innerHTML += `<div style="margin-top:8px"><button id="syncBtn" style="background:#2a6">Sync Playlists (Spotify → Redis)</button></div>`;
+        document.getElementById('relinkBtn').addEventListener('click', ()=>{ window.location.href='/auth/spotify'; });
+        document.getElementById('clearLinkBtn').addEventListener('click', async ()=>{ await fetch('/auth/relink',{headers:{Accept:'application/json'}}); setTimeout(refreshSpotifyStatus,500); });
+        document.getElementById('testWriteBtn').addEventListener('click', async ()=>{
+          const btn = document.getElementById('testWriteBtn'); btn.textContent='Testing...'; btn.disabled=true;
+          try {
+            const r = await fetch('/api/spotify/test-add',{credentials:'include'}); const j = await r.json();
+            let msg = j.ok ? '✅ Write test PASSED!' : '❌ Write test FAILED';
+            if(j.results && j.results.steps) msg += '\n' + j.results.steps.map(s=>`${s.ok?'✅':'❌'} ${s.step}: ${s.error||s.status||'ok'}`).join('\n');
+            if(j.results && j.results.responseHeaders) msg += '\nHeaders: ' + JSON.stringify(j.results.responseHeaders);
+            alert(msg);
+          } catch(e){ alert('Test failed: '+e.message); }
+          btn.textContent='Test Write'; btn.disabled=false;
+        });
+        document.getElementById('syncBtn').addEventListener('click', async ()=>{
+          const btn = document.getElementById('syncBtn'); btn.textContent='Syncing...'; btn.disabled=true;
+          try{
+            const r = await fetch('/api/admin/sync_playlists',{method:'POST',headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify({ direction: 'spotify->redis' })});
+            const j = await r.json();
+            if (j.ok) alert('Sync complete: ' + JSON.stringify(j.result)); else alert('Sync failed: '+(j.error||'unknown'));
+          }catch(e){ alert('Sync error: '+e.message); }
+          btn.textContent='Sync Playlists (Spotify → Redis)'; btn.disabled=false;
+        });
+      } catch (e){ el.innerHTML = '<div class="muted">Error checking Spotify status</div>'; }
+    }
+
+    document.getElementById('loginBtn').addEventListener('click', async ()=>{
+      const user = document.getElementById('adminUser').value;
+      const pass = document.getElementById('adminPass').value;
+      const r = await fetch('/api/admin/login', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user,pass}), credentials:'include'});
+      const j = await r.json(); if (j.ok) { showPanel(); } else alert('Login failed');
+    });
+    document.getElementById('logoutBtn').addEventListener('click', async ()=>{ await fetch('/api/admin/logout',{method:'POST',credentials:'include'}); checkAuth(); });
+
+    socket.on('requests_update', data => renderRequests(data));
+    socket.on('live_update', data => renderLive(data));
+
+    async function approve(id){
+      const res = await fetch('/api/admin/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({trackId:id}), credentials:'include'});
+      const j = await res.json(); if(!j.ok) alert('Error: '+(j.error||'unknown'));
+    }
+    async function rejectReq(id){
+      const res = await fetch('/api/admin/reject',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({trackId:id}), credentials:'include'});
+      const j = await res.json(); if(!j.ok) alert('Error: '+(j.error||'unknown'));
+    }
+    async function removeLive(id){
+      const res = await fetch('/api/admin/remove_live',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({trackId:id}), credentials:'include'});
+      const j = await res.json(); if(!j.ok) alert('Error: '+(j.error||'unknown'));
+    }
+
+    function renderRequests(list){
+      const root = document.getElementById('requests'); root.innerHTML='';
+      if(!list || list.length===0){ root.innerHTML='<div class="muted">No requests</div>'; return }
+      list.forEach(item=>{
+        const el = document.createElement('div'); el.className='item';
+        const spotifyNote = (item.spotifyAddedToRequests === false) ? `<div class="muted small">⚠️ Failed to add to Spotify: ${item.spotifyError||'unknown'}</div>` : '';
+        const retryBtn = (item.spotifyAddedToRequests === false) ? `<button onclick="retrySpotify('${item.track.id}')" style="background:#e8a">Retry Spotify</button>` : '';
+        el.innerHTML = `<div class="thumb" style="background-image:url(${item.track.albumImage});background-size:cover"></div><div class="meta"><div><strong>${item.track.title}</strong></div><div class="muted small">${item.track.artists}</div>${spotifyNote}</div><div style="display:flex;flex-direction:column;gap:6px"><button onclick="approve('${item.track.id}')">Approve</button><button onclick="rejectReq('${item.track.id}')" style="background:#b33">Reject</button>${retryBtn}</div>`;
+        root.appendChild(el);
+      })
+    }
+    async function retrySpotify(id){
+      const res = await fetch('/api/admin/retry_spotify_request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({trackId:id}), credentials:'include'});
+      const j = await res.json(); if(!j.ok) alert('Error: '+(j.error||'unknown'));
+    }
+    function renderLive(list){
+      const root = document.getElementById('live'); root.innerHTML='';
+      if(!list || list.length===0){ root.innerHTML='<div class="muted">No live tracks</div>'; return }
+      list.forEach(item=>{
+        const el = document.createElement('div'); el.className='item';
+        el.innerHTML = `<div class="thumb" style="background-image:url(${item.track.albumImage});background-size:cover"></div><div class="meta"><div><strong>${item.track.title}</strong></div><div class="muted small">${item.track.artists}</div></div><div><button onclick="removeLive('${item.track.id}')" style="background:#b33">Remove</button></div>`;
+        root.appendChild(el);
+      })
+    }
+
+    checkAuth();
+  </script>
+</body>
+</html>

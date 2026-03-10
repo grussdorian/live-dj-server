@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ISC Song Request</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="topbar">
+        <h2>Request a song</h2>
+        <a href="/admin" class="small muted">DJ Admin</a>
+      </div>
+
+      <p class="muted">Paste a Spotify Track URL (or ID)</p>
+      <div class="inputRow">
+        <input id="trackUrl" type="text" placeholder="https://open.spotify.com/track/...">
+        <button id="sendButton">Send</button>
+      </div>
+      <div style="height:12px"></div>
+      <div id="preview"></div>
+      <div style="height:12px"></div>
+      <div id="actions"></div>
+      <p id="msg" class="muted small"></p>
+      <hr style="margin:18px 0;border-color:rgba(255,255,255,0.04)" />
+      <h3 class="small">Live Playlist</h3>
+      <div id="liveList" class="list muted">Loading live playlist...</div>
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/app.js"></script>
+  <script>
+    // small page init
+    (function(){
+      const el = document.querySelector('.topbar a');
+      // link shown after request only
+      el.style.display='none';
+    })()
+  </script>
+</body>
+</html>
