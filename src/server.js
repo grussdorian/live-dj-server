@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const env = process.env.NODE_ENV || 'dev';
 const LOCAL_URL = process.env.LOCAL_URL || 'localhost';
+const PORT = process.env.PORT || 3000;
 // robust fetch import: prefer global fetch (Node 18+), otherwise try node-fetch (v2 or v3)
 let fetch;
 try {
@@ -53,7 +54,6 @@ redis.on('error', (err) => console.error('Redis Client Error', err));
 	}
 })();
 
-const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(cookieParser());
