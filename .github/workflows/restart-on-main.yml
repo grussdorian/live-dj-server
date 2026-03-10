@@ -8,6 +8,7 @@ jobs:
   restart:
     name: Restart service
     runs-on: [self-hosted, linux]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -27,16 +28,29 @@ jobs:
           fi
 
       - name: Install dependencies
-        run: npm i
+        run: npm install
         env:
           NODE_ENV: production
-      - name: Restart server
-        # first stop the server then start it
-        # stop the already running server (if any)
+
+      - name: Install PM2 globally (first run only)
         run: |
-          echo "Stopping existing server (if any)..."
-          pkill -f "node src/server.js" || echo "No existing server process found."
-          echo "Starting server..."
-          npm start
+          if ! command -v pm2 &> /dev/null; then
+            echo "PM2 not found, installing..."
+            sudo npm install -g pm2
+          else
+            echo "PM2 already installed"
+          fi
+
+      - name: Restart server with PM2
+        run: |
+          if pm2 list | grep -q "live-dj"; then
+            echo "Restarting existing PM2 process..."
+            pm2 restart live-dj
+          else
+            echo "Starting new PM2 process..."
+            pm2 start src/server.js --name live-dj
+          fi
+
+          pm2 save
         env:
           NODE_ENV: production
