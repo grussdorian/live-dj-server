@@ -63,6 +63,8 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'index.html')));
 // removed dedicated /live page; live playlist shown on landing page now
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'admin.html')));
+// About page
+app.get('/about', (req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'about.html')));
 
 // Admin auth using JWT stored in an HttpOnly cookie
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
@@ -925,6 +927,11 @@ app.post('/api/admin/sync_playlists', verifyAdmin, express.json(), async (req, r
 		io.emit('live_update', await getLive());
 		return res.json({ ok: true, result });
 	}catch(e){ console.error('sync_playlists failed', e); return res.status(500).json({ ok: false, error: e.message }); }
+});
+
+// wildcard 404 handler (serve styled 404 page)
+app.use((req, res) => {
+	res.status(404).sendFile(path.join(__dirname, '..', 'public', '404.html'));
 });
 
 server.listen(PORT, () => console.log(`Server listening on ${PORT} and url ${LOCAL_URL}`));
