@@ -86,6 +86,7 @@ function verifyAdmin(req, res, next) {
 app.post('/api/admin/login', (req, res) => {
 	const { user, pass } = req.body || {};
   console.log(`Provided credentials: user=${user} pass=${pass ? pass.substring(0, 3) + '...' + pass.slice(-3) : '(empty)'}`);
+  console.log(`Expected credentials: user=${ADMIN_USER} pass=${ADMIN_PASS ? ADMIN_PASS.substring(0, 3) + '...' + ADMIN_PASS.slice(-3) : '(empty)'}`);
 	if (user !== ADMIN_USER || pass !== ADMIN_PASS) return res.status(401).json({ ok: false, error: 'Invalid credentials' });
 
 	const token = signAdminToken();
