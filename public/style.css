@@ -3,7 +3,7 @@
 }
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;background:linear-gradient(180deg,#05060a 0%,#0b0f14 100%);color:#e6eef3;font-family:Inter,system-ui,Arial,Helvetica,sans-serif;display:flex;align-items:flex-start;justify-content:center;padding:24px}
+body{margin:0;background:linear-gradient(180deg,#05060a 0%,#0b0f14 100%);color:#e6eef3;font-family:'Cormorant Garamond', Georgia, 'Times New Roman', serif;display:flex;align-items:flex-start;justify-content:center;padding:24px}
 .container{max-width:760px;width:100%}
 .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(2,6,23,.6)}
 .center{text-align:center}
@@ -17,6 +17,10 @@ button{background:var(--accent);border:none;color:#fff;padding:10px 14px;border-
 .list .item{display:flex;gap:12px;align-items:center;padding:8px;border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent)}
 .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .topbar .top-right{display:flex;align-items:center;gap:8px}
+
+/* site title: classy serif */
+.site-title{font-family:'Cormorant Garamond', Georgia, 'Times New Roman', serif;font-weight:400;margin:0;font-size:30px;letter-spacing:0.4px;color:inherit;line-height:1}
+.site-title { font-variant-ligatures: discretionary-ligatures; }
 .small{font-size:13px}
 /* input row with send button */
 .inputRow{display:flex;gap:8px;align-items:center;margin-top:6px}
