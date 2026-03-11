@@ -16,6 +16,7 @@ button{background:var(--accent);border:none;color:#fff;padding:10px 14px;border-
 .list{margin-top:12px;display:flex;flex-direction:column;gap:8px}
 .list .item{display:flex;gap:12px;align-items:center;padding:8px;border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent)}
 .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.topbar .top-right{display:flex;align-items:center;gap:8px}
 .small{font-size:13px}
 /* input row with send button */
 .inputRow{display:flex;gap:8px;align-items:center;margin-top:6px}
@@ -51,3 +52,27 @@ button{background:var(--accent);border:none;color:#fff;padding:10px 14px;border-
 .thank-you{opacity:0;transform:translateY(6px);transition:opacity 420ms ease, transform 420ms ease;text-align:center;font-weight:700;position:absolute;left:0;right:0;top:0;padding:12px}
 .thank-you{pointer-events:none}
 .thank-you.show{opacity:1;transform:translateY(0);pointer-events:auto}
+
+/* Sprite row on landing page */
+.sprite-row{display:flex;gap:10px;align-items:center;justify-content:flex-start;margin:8px 0}
+.sprite-item{width:48px;height:48px;display:flex;align-items:center;justify-content:center;border-radius:6px;overflow:hidden;background:transparent}
+.sprite-item img{width:40px;height:40px;image-rendering:pixelated;display:block;transition:transform .18s ease}
+.sprite-item:hover img{transform:scale(1.12)}
+.sprite-item.lock img{filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}
+
+@media(max-width:460px){.sprite-row{gap:8px}.sprite-item{width:40px;height:40px}.sprite-item img{width:32px;height:32px}}
+
+/* about page scene sprites are larger */
+.about-sprites .sprite-item.scene{width:96px;height:64px;border-radius:8px}
+.about-sprites .sprite-item.scene img{width:88px;height:72px}
+.about-sprites .sprite-item.scene:hover img{transform:scale(1.04)}
+@media(max-width:460px){.about-sprites .sprite-item.scene{width:72px;height:52px}.about-sprites .sprite-item.scene img{width:64px;height:44px}}
+
+/* app icon and instagram */
+.app-icon{width:96px;height:96px;object-fit:contain;display:block;margin:0 auto;image-rendering:pixelated}
+.insta-icon{width:18px;height:18px;vertical-align:middle;margin-right:6px}
+
+/* about page inline sprite under list items */
+.about-sprite-inline{margin-top:8px;text-align:center}
+.about-sprite-inline img{max-width:220px;height:auto;image-rendering:pixelated;border-radius:6px}
+@media(max-width:460px){.about-sprite-inline img{max-width:160px}}
