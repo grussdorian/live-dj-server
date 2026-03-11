@@ -23,3 +23,31 @@ button{background:var(--accent);border:none;color:#fff;padding:10px 14px;border-
 .inputRow button{flex:0 0 auto;padding:10px 12px}
 @media(max-width:460px){.thumb{width:52px;height:52px}}
 @media(max-width:460px){.inputRow{flex-direction:column;align-items:stretch}.inputRow button{width:100%}}
+
+/* FUN STUFF link styling */
+.fun-link{font-weight:700;color:#fff}
+.fun-glow{position:relative;text-shadow:0 0 6px #ffd700,0 0 14px rgba(255,215,0,0.6);}
+.fun-glow::after{content:"✨";position:relative;margin-left:6px;display:inline-block;animation:twinkle 1.6s infinite ease-in-out}
+@keyframes twinkle{
+  0%{opacity:0;transform:translateY(-2px) scale(.9)}
+  40%{opacity:1;transform:translateY(0) scale(1)}
+  70%{opacity:.6;transform:translateY(-1px) scale(.95)}
+  100%{opacity:0;transform:translateY(-2px) scale(.9)}
+}
+
+/* simple signup box for about page */
+
+.signup-container{position:relative}
+.signup-box{margin-top:8px;padding:12px;border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);display:flex;gap:8px;align-items:center;overflow:hidden}
+.signup-box input[type=email]{flex:1;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+.signup-box button{padding:8px 10px;border-radius:6px}
+
+/* animation for shrinking signup box and showing thank-you */
+.signup-fade-out{animation:shrinkHide 600ms cubic-bezier(.2,.9,.2,1) forwards;transform-origin:50% 0}
+@keyframes shrinkHide{
+  0%{opacity:1;transform:scale(1) translateY(0);}
+  100%{opacity:0;transform:scale(.6) translateY(-8px);height:0;margin:0;padding:0}
+}
+.thank-you{opacity:0;transform:translateY(6px);transition:opacity 420ms ease, transform 420ms ease;text-align:center;font-weight:700;position:absolute;left:0;right:0;top:0;padding:12px}
+.thank-you{pointer-events:none}
+.thank-you.show{opacity:1;transform:translateY(0);pointer-events:auto}

@@ -3,26 +3,174 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>About - ISC Song Request</title>
+  <title>About - Fheya</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <div class="container">
     <div class="card">
       <div class="topbar">
-        <h2>About</h2>
-        <a href="/" class="small muted">View Live</a>
+        <h2>About Fheya</h2>
+        <a href="/" class="small muted" onclick="try{ localStorage.setItem('funGlow','0'); }catch(e){}">View Live</a>
       </div>
-      <div class="center">
-        <p class="muted">This is a lightweight song request app used to collect and manage Spotify track requests for live DJ sessions.</p>
+
+      <div class="left">
+        <p class="muted" align="justify"><strong>Dating, But Without the Creepy Overlords</strong><br>
+        Welcome to Fheya - the dating app for people who value privacy more than their ex's apology text.</p>
       </div>
-      <h3>How it works</h3>
-      <p class="muted">Visitors paste a Spotify track link or ID, which is validated and queued. Admins may approve requests to move them into the live playlist. The app can optionally mirror playlists to Spotify and persist state in Redis.</p>
-      <h3>Notes</h3>
-      <p class="muted">Most of it is under construction but good enough :)</p>
+
+      <h3>Why Fheya?</h3>
+      <p class="muted" align="justify">Because swiping right on a soulmate shouldn't mean swiping left on your privacy. Unlike other apps (we're looking at you, Tinder), we don't sell your data, judge your life choices, or let algorithms decide your love life. We just help you find someone to split the bill with.</p>
+
+      <h3>Our Values</h3>
+      <ol class="muted" align="justify">
+        <li>
+          <strong>No Data, No Drama</strong>
+          <ul>
+            <li>We don't <b>store</b> your secrets. We don't <b>sell</b> your secrets. We don't even <b>know your secrets</b>. Your data stays yours—encrypted, locked, and thrown away like last year's New Year's resolutions.</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Matches That Actually Mean Something</strong>
+          <ul>
+            <li>One or two real matches per week. No endless swiping, no ghosting Olympics, no "Oops, I super-liked your cat by accident."</li>
+          </ul>
+        </li>
+        <li>
+          <strong>No Paywalls, No Games</strong>
+          <ul>
+            <li>We won't make you pay to see who likes you. That's just emotional blackmail, and we're better than that.</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Fairness &gt; Algorithms</strong>
+          <ul>
+            <li>Our matching isn't rigged by who pays the most. It's random, fair, and based on actual compatibility (not just who swiped right on a blurry bathroom selfie).</li>
+          </ul>
+        </li>
+        <li>
+          <strong>QR Codes &gt; Small Talk</strong>
+          <ul>
+            <li>Verify matches in person. Scan a QR code, meet IRL, and earn brownie points (yes, like cookies, but for not being a catfish).</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Privacy So Tight, Even We Can't Peek</strong>
+          <ul>
+            <li>Your location? <b>Encrypted</b>. Your chats? <b>Encrypted</b>. Your embarrassing profile? Also <b>encrypted</b>. We use Fully Homomorphic Encryption—fancy tech that means we never see your data. Ever.</li>
+          </ul>
+        </li>
+        <li>
+          <strong>No Paradox of Choice, Just Good Vibes</strong>
+          <ul>
+            <li><b>Women:</b> No more drowning in "Hey" messages. <b>Men:</b> No more wondering if your profile is in the "shadowban" purgatory.</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Brownie Points for Being a Decent Human</strong>
+          <ul>
+            <li>Rate your dates (good or bad). More brownies = better matches. It's like karma, but with math.</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Matches Expire - Like Milk, But Less Gross</strong>
+          <ul>
+            <li>A week to chat, meet, or ghost. Then, poof—it's gone. No digital clutter, no regrets.</li>
+          </ul>
+        </li>
+      </ol>
+
       <div style="height:10px"></div>
-      <div class="small muted">Built with ❤️ - Hardik</div>
+      <div>
+        <div class="center"><h3>Join the revolution</h3></div>
+        <div class="muted" id="signupHelper" style="margin-bottom:8px">show your interest by signing up early - enter your email</div>
+        <div id="signupContainer" class="signup-container">
+          <div class="signup-box" id="signupBox">
+            <input id="signupEmail" type="email" placeholder="you@domain.com" aria-label="email" />
+            <button id="signupBtn" type="button">Sign up</button>
+          </div>
+          <div id="signupError" class="muted small" style="color:#ffb3b3;display:none;margin-top:8px"></div>
+          <div id="thankYou" class="thank-you" aria-hidden="true">Thank you for your interest</div>
+        </div>
+        <div style="margin-top:8px;font-weight:700" id="interestCount">30+ people have shown interest</div>
+
+        <div style="margin-top:12px" class="muted" align="justify">Fheya is under construction, this early signup is to gain traction for this new privacy preserving technology. We will email you with a joining code once its ready to be launched. Your email is never shared with anyone.</div>
+
+        <div style="margin-top:12px" class="muted">Built with ❤️ - Your friendly DJ, Hardik</div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function(){
+      const emailInput = document.getElementById('signupEmail');
+      const btn = document.getElementById('signupBtn');
+      const countEl = document.getElementById('interestCount');
+      const signupBox = document.getElementById('signupBox');
+      const signupContainer = document.getElementById('signupContainer');
+      const signupError = document.getElementById('signupError');
+      const thankYou = document.getElementById('thankYou');
+      // ensure initial state is interactive (in case of bfcache/back/forward)
+      try{
+        if(signupBox){ signupBox.style.visibility = 'visible'; signupBox.classList.remove('signup-fade-out'); signupBox.removeAttribute('aria-hidden'); }
+        if(signupContainer){ signupContainer.style.minHeight = ''; }
+        if(thankYou){ thankYou.style.display = 'none'; thankYou.classList.remove('show'); thankYou.setAttribute('aria-hidden','true'); }
+      }catch(e){}
+      if(!btn || !emailInput) return;
+
+      function showError(text){
+        if(!signupError) return;
+        if(!text){ signupError.style.display='none'; signupError.textContent=''; }
+        else { signupError.style.display='block'; signupError.textContent = text; }
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      btn.addEventListener('click', async ()=>{
+        const email = (emailInput.value || '').trim();
+        if(!email) { showError('Please enter your email'); return; }
+        if(!emailRegex.test(email)) { showError('Please enter a valid email address'); return; }
+        showError('');
+        btn.disabled = true; btn.textContent = 'Signing up...';
+        try{
+          const r = await fetch('/api/interest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+          const j = await r.json();
+          if(r.ok && j.ok){
+            if (j.added === false) {
+              showError('You are already signed up. Thanks!');
+              emailInput.value = '';
+            } else {
+              // update displayed count only for >= 30 and in multiples of 5
+              if (typeof j.count === 'number' && j.count >= 10) {
+                const display = Math.floor(j.count / 5) * 5;
+                if (display >= 30) {
+                  countEl.textContent = display + '+ people have shown interest';
+                }
+              }
+              // animate form shrink and show thank you
+              try{
+                // preserve container height so content below doesn't jump
+                try{ const h = signupContainer.offsetHeight; signupContainer.style.minHeight = h + 'px'; }catch(e){}
+                thankYou.style.display = 'block';
+                thankYou.setAttribute('aria-hidden','false');
+                // trigger reflow for transition
+                void signupBox.offsetWidth;
+                signupBox.classList.add('signup-fade-out');
+                thankYou.classList.add('show');
+                // after animation, hide signupBox visually but keep its layout space
+                signupBox.addEventListener('animationend', ()=>{ signupBox.style.visibility = 'hidden'; signupBox.setAttribute('aria-hidden','true'); }, { once:true });
+              }catch(e){}
+              emailInput.value = '';
+            }
+          } else {
+            showError('Signup failed: ' + (j && j.error ? j.error : r.statusText));
+          }
+        }catch(e){ showError('Signup error: '+(e && e.message ? e.message : String(e))); }
+        btn.disabled = false; btn.textContent = 'Sign up';
+      });
+    })()
+  </script>
     </div>
   </div>
 </body>
 </html>
+```

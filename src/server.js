@@ -121,6 +121,7 @@ if (!SPOTIFY_REFRESH_TOKEN && fs.existsSync(tokenFile)) {
 }
 const PLAYLIST_REQUESTS = process.env.PLAYLIST_REQUESTS_ID || process.env.ISC_SONG_REQUESTS_PLAYLIST_ID;
 const PLAYLIST_LIVE = process.env.PLAYLIST_LIVE_ID || process.env.ISC_LIVE_PLAYLIST_ID;
+console.log('[Config] PLAYLIST_REQUESTS=', PLAYLIST_REQUESTS, 'PLAYLIST_LIVE=', PLAYLIST_LIVE);
 
 // Separate token caches — user tokens (from refresh_token) can write playlists,
 // client_credentials tokens are read-only. Mixing them up causes 403.
@@ -848,37 +849,102 @@ app.get('/api/spotify/test-add', verifyAdmin, async (req, res) => {
 });
 
 // Fetch full playlist tracks (paginated) and normalize to local track shape
-async function fetchSpotifyPlaylistTracksFull(playlistId){
-	const token = await getSpotifyAccessToken();
-	// Use the playlist object with fields to fetch tracks and paging reliably
-	const fields = 'tracks.items(track(id,uri,name,artists(name),album(images))),tracks.next';
-	let url = `https://api.spotify.com/v1/playlists/${playlistId}?fields=${encodeURIComponent(fields)}`;
-	const out = [];
-	while (url) {
-		const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-		const txt = await r.text(); let data;
-		try { data = txt ? JSON.parse(txt) : {}; } catch (e) { data = { raw: txt }; }
-		if (!r.ok) {
-			// extra diagnostics for 403/401 — identify token owner and playlist owner
-			let me = null; let pl = null;
-			try { const m = await fetch('https://api.spotify.com/v1/me', { headers: { Authorization: `Bearer ${token}` } }); me = m.ok ? await m.json() : null; } catch (e) { }
-			try { const p = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}`, { headers: { Authorization: `Bearer ${token}` } }); pl = p.ok ? await p.json() : null; } catch (e) { }
-			const meId = me && me.id ? me.id : '<unknown>';
-			const ownerId = pl && pl.owner && pl.owner.id ? pl.owner.id : '<unknown>';
-			const msg = `Failed to fetch playlist tracks: ${r.status} ${r.statusText} - tokenUser=${meId} playlistOwner=${ownerId} body=${JSON.stringify(data)}`;
-			throw new Error(msg);
+let _cachedUserCountry = null;
+async function getUserCountry(){
+	if (_cachedUserCountry) return _cachedUserCountry;
+	try{
+		const token = await getSpotifyAccessToken();
+		const r = await fetch('https://api.spotify.com/v1/me', { headers: { Authorization: `Bearer ${token}` } });
+		if (r.ok){
+			const me = await r.json();
+			_cachedUserCountry = me && me.country ? me.country : null;
 		}
-		const trackBlock = data.tracks || {};
-		const items = trackBlock.items || [];
-		for (const it of items) {
-			const tr = it && it.track;
-			if (!tr || !tr.id) continue;
-			out.push({ id: tr.id, uri: tr.uri, title: tr.name, artists: (tr.artists || []).map(a => a.name).join(', '), albumImage: (tr.album && tr.album.images && tr.album.images[0]) ? tr.album.images[0].url : null });
-		}
-		// next may be in tracks.next
-		url = trackBlock.next || null;
-	}
-	return out;
+	} catch(e){ /* ignore */ }
+	return _cachedUserCountry;
+}
+
+async function fetchSpotifyPlaylistTracksFull(playlistId) {
+  const token = await getSpotifyAccessToken();
+  const out = [];
+  
+  const country = await getUserCountry();
+  // Using ? instead of & for the first query parameter
+  let marketParam = country ? `?market=${country}` : '';
+  
+  // FIX 1: Added the missing '$' before {playlistId}
+  // FIX 2: Targeting the main playlist endpoint as requested
+  let url = `https://api.spotify.com/v1/playlists/${playlistId}${marketParam}`;
+  
+  // Flag to track if we are on the first request (which returns the full playlist object)
+  // or a paginated request (which returns just the tracks object)
+  let isFirstPage = true;
+
+  while (url) {
+    console.log('[Spotify] fetching url:', url);
+    let r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+    
+    if (r.status === 403 && marketParam) {
+      console.warn('[Spotify] 403 fetching with market', country, '- retrying without market');
+      url = url.replace(marketParam, '');
+      marketParam = '';
+      r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+    }
+
+    let data;
+    try {
+      data = await r.json();
+    } catch (e) {
+      throw new Error('Failed to parse playlist response: ' + e.message);
+    }
+
+    if (!r.ok) {
+      throw new Error(`Failed to fetch playlist tracks: ${r.status} ${r.statusText} - body=${JSON.stringify(data)}`);
+    }
+
+    // FIX 3: Handle the new JSON structure
+    // On the first page, items are nested inside data.tracks. 
+    // On 'next' pages, Spotify returns the paging object directly.
+    const tracksObj = isFirstPage ? (data.tracks || data.items) : data;
+    const items = tracksObj?.items || [];
+
+    for (const it of items) {
+      // Safely grab the track object
+      let tr = it.track || it.item;
+      
+      if (!tr || !tr.id) {
+        continue; // Skip empty or local files without IDs
+      }
+
+      // FIX 4: Extract the specific spotify link from external_urls as requested
+      const spotifyLink = (tr.external_urls && tr.external_urls.spotify) ? tr.external_urls.spotify : null;
+
+      out.push({
+        id: tr.id,
+        uri: tr.uri,
+        link: spotifyLink, 
+        title: tr.name,
+        artists: (tr.artists || []).map(a => a.name).join(', '),
+        albumImage: (tr.album && tr.album.images && tr.album.images[0]) ? tr.album.images[0].url : null
+      });
+    }
+
+    // Grab the next URL to fetch the rest of the playlist if it's over 100 songs
+    url = tracksObj?.next || null;
+    isFirstPage = false; 
+  }
+  
+  return out;
+}
+
+// helper: retrieve total track count for a Spotify playlist (used for diagnostics)
+async function getPlaylistTotal(playlistId){
+	try{
+		const token = await getSpotifyAccessToken();
+		const r = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}?fields=tracks.total`, { headers: { Authorization: `Bearer ${token}` } });
+		if (!r.ok) return null;
+		const j = await r.json();
+		return j && j.tracks && typeof j.tracks.total === 'number' ? j.tracks.total : null;
+	} catch(e){ return null; }
 }
 
 // Admin: get sync status between Spotify playlists and Redis lists/sets
@@ -887,15 +953,17 @@ app.get('/api/admin/sync_status', verifyAdmin, async (req, res) => {
 		const report = {};
 		if (PLAYLIST_REQUESTS) {
 			const spReq = await fetchSpotifyPlaylistTracksFull(PLAYLIST_REQUESTS);
+			const totalReq = await getPlaylistTotal(PLAYLIST_REQUESTS);
 			const redisReqRaw = await redis.lRange(REDIS_REQ_KEY, 0, -1);
 			const redisReq = redisReqRaw.map(r=>{ try{ return JSON.parse(r).track }catch(e){return null} }).filter(Boolean).map(t=>t.id);
-			report.requests = { spotifyCount: spReq.length, spotifyIds: spReq.map(t=>t.id), redisCount: redisReq.length, redisIds: redisReq };
+			report.requests = { spotifyCount: spReq.length, spotifyTotal: totalReq, spotifyIds: spReq.map(t=>t.id), redisCount: redisReq.length, redisIds: redisReq };
 		}
 		if (PLAYLIST_LIVE) {
 			const spLive = await fetchSpotifyPlaylistTracksFull(PLAYLIST_LIVE);
+			const totalLive = await getPlaylistTotal(PLAYLIST_LIVE);
 			const redisLiveRaw = await redis.lRange(REDIS_LIVE_KEY, 0, -1);
 			const redisLive = redisLiveRaw.map(r=>{ try{ return JSON.parse(r).track }catch(e){return null} }).filter(Boolean).map(t=>t.id);
-			report.live = { spotifyCount: spLive.length, spotifyIds: spLive.map(t=>t.id), redisCount: redisLive.length, redisIds: redisLive };
+			report.live = { spotifyCount: spLive.length, spotifyTotal: totalLive, spotifyIds: spLive.map(t=>t.id), redisCount: redisLive.length, redisIds: redisLive };
 		}
 		return res.json({ ok: true, report });
 	}catch(e){ console.error('sync_status failed', e); return res.status(500).json({ ok: false, error: e.message }); }
@@ -906,36 +974,61 @@ app.post('/api/admin/sync_playlists', verifyAdmin, express.json(), async (req, r
 	try{
 		const direction = (req.body && req.body.direction) || 'spotify->redis';
 		if (direction !== 'spotify->redis') return res.status(400).json({ ok: false, error: 'Only spotify->redis sync supported for safety' });
+		if (!PLAYLIST_REQUESTS && !PLAYLIST_LIVE) {
+			return res.status(400).json({ ok: false, error: 'No Spotify playlists configured (PLAYLIST_REQUESTS_ID or PLAYLIST_LIVE_ID)' });
+		}
 		const result = { requests: null, live: null };
-		if (PLAYLIST_REQUESTS) {
-			const spReq = await fetchSpotifyPlaylistTracksFull(PLAYLIST_REQUESTS);
-			// replace Redis requests list and set
-			await redis.del(REDIS_REQ_KEY);
-			await redis.del(REDIS_REQ_SET);
-			if (spReq.length>0){
-				const pushItems = spReq.map(t => JSON.stringify({ addedAt: Date.now(), track: t }));
-				// push in order
-				for (const p of pushItems) await redis.rPush(REDIS_REQ_KEY, p);
-				for (const t of spReq) await redis.sAdd(REDIS_REQ_SET, t.id);
+		// helper to perform sync for one playlist
+		async function syncOne(playlistId, redisKey, redisSet, emitEventName) {
+			const tracks = await fetchSpotifyPlaylistTracksFull(playlistId);
+			const spotifyTotal = await getPlaylistTotal(playlistId);
+			console.log('[sync_playlists] fetched', tracks.length, 'tracks from', playlistId, '(spotify reports', spotifyTotal, 'total)');
+			// replace Redis
+			await redis.del(redisKey);
+			await redis.del(redisSet);
+			console.log('[DEBUG] FULL', playlistId, 'TO SYNC: ', tracks);
+			if (tracks.length > 0) {
+				for (const t of tracks) {
+					await redis.rPush(redisKey, JSON.stringify({ addedAt: Date.now(), track: t }));
+					await redis.sAdd(redisSet, t.id);
+				}
 			}
-			result.requests = { syncedCount: spReq.length };
+			// notify clients
+			io.emit(emitEventName, tracks);
+			return { syncedCount: tracks.length, spotifyTotal, tracks };
+		}
+
+		if (PLAYLIST_REQUESTS) {
+			result.requests = await syncOne(PLAYLIST_REQUESTS, REDIS_REQ_KEY, REDIS_REQ_SET, 'requests_synced');
 		}
 		if (PLAYLIST_LIVE) {
-			const spLive = await fetchSpotifyPlaylistTracksFull(PLAYLIST_LIVE);
-			await redis.del(REDIS_LIVE_KEY);
-			await redis.del(REDIS_LIVE_SET);
-			if (spLive.length>0){
-				const pushItems = spLive.map(t => JSON.stringify({ addedAt: Date.now(), track: t }));
-				for (const p of pushItems) await redis.rPush(REDIS_LIVE_KEY, p);
-				for (const t of spLive) await redis.sAdd(REDIS_LIVE_SET, t.id);
-			}
-			result.live = { syncedCount: spLive.length };
+			result.live = await syncOne(PLAYLIST_LIVE, REDIS_LIVE_KEY, REDIS_LIVE_SET, 'live_synced');
 		}
-		// emit updates
+		// send updated lists to anyone listening
 		io.emit('requests_update', await getRequests());
 		io.emit('live_update', await getLive());
 		return res.json({ ok: true, result });
 	}catch(e){ console.error('sync_playlists failed', e); return res.status(500).json({ ok: false, error: e.message }); }
+});
+
+// Collect early-signup interest emails and store in Redis set (deduplicated)
+app.post('/api/interest', express.json(), async (req, res) => {
+	try {
+		const { email } = req.body || {};
+		if (!email || typeof email !== 'string') return res.status(400).json({ ok: false, error: 'Missing email' });
+		const e = email.trim().toLowerCase();
+		// basic validation
+		if (!/^\S+@\S+\.\S+$/.test(e)) return res.status(400).json({ ok: false, error: 'Invalid email' });
+		// add to Redis set (deduplicated)
+		const added = await redis.sAdd('interest:emails', e); // returns 1 if added, 0 if already member
+		const count = await redis.sCard('interest:emails');
+		// also keep a numeric cache for quick reads (optional)
+		try { await redis.set('interest:count', String(count)); } catch (err) {}
+		return res.json({ ok: true, count, added: !!added });
+	} catch (err) {
+		console.error('interest endpoint error', err);
+		return res.status(500).json({ ok: false, error: err.message || String(err) });
+	}
 });
 
 // wildcard 404 handler (serve styled 404 page)

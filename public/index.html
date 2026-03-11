@@ -11,7 +11,7 @@
     <div class="card">
       <div class="topbar">
         <h2>Request a song</h2>
-        <a href="/admin" class="small muted">DJ Admin</a>
+        <a href="/about" class="small muted">FUN STUFF :)</a>
       </div>
 
       <p class="muted">Paste a Spotify Track URL (or ID)</p>
@@ -35,8 +35,21 @@
     // small page init
     (function(){
       const el = document.querySelector('.topbar a');
-      // link shown after request only
-      el.style.display='none';
+      try{
+        const visible = localStorage.getItem('funVisible');
+        const glow = localStorage.getItem('funGlow');
+        if(el){
+          el.classList.add('fun-link');
+          if(visible === '1') {
+            el.style.display = 'inline-block';
+            if(glow === '1') el.classList.add('fun-glow');
+          } else {
+            el.style.display = 'none';
+          }
+          // when user clicks to visit about, clear the glow (persisted)
+          el.addEventListener('click', ()=>{ try{ localStorage.setItem('funGlow','0'); el.classList.remove('fun-glow'); }catch(e){} });
+        }
+      }catch(e){ if(el) el.style.display='none'; }
     })()
   </script>
 </body>

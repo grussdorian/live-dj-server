@@ -24,10 +24,16 @@
         <div id="panel" style="display:none">
           <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px"><button id="logoutBtn">Logout</button><div class="muted">Approve, Reject requests or Remove live tracks</div></div>
           <div id="spotifyStatus" style="margin-bottom:12px"></div>
-          <h3>Requests</h3>
-          <div id="requests" class="list muted">Loading...</div>
-          <h3 style="margin-top:12px">Live</h3>
-          <div id="live" class="list muted">Loading...</div>
+          <div style="display:flex;gap:16px">
+            <div style="flex:1">
+              <h3>Requests</h3>
+              <div id="requests" class="list muted">Loading...</div>
+            </div>
+            <div style="flex:1">
+              <h3>Live</h3>
+              <div id="live" class="list muted">Loading...</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -61,7 +67,7 @@
           else el.innerHTML += `<div class="muted small">Owner mismatch — re-link with playlist owner</div>`;
         }
         el.innerHTML += `<div style="margin-top:8px"><button id="relinkBtn">Re-link Spotify</button> <button id="clearLinkBtn" style="background:#b33">Clear Link</button> <button id="testWriteBtn" style="background:#383">Test Write</button></div>`;
-        el.innerHTML += `<div style="margin-top:8px"><button id="syncBtn" style="background:#2a6">Sync Playlists (Spotify → Redis)</button></div>`;
+        el.innerHTML += `<div style="margin-top:8px"><button id="syncBtn" style="background:#2a6">Sync Playlists (Spotify → Redis)</button><div id="syncMessage" class="muted small" style="margin-top:4px"></div></div>`;
         document.getElementById('relinkBtn').addEventListener('click', ()=>{ window.location.href='/auth/spotify'; });
         document.getElementById('clearLinkBtn').addEventListener('click', async ()=>{ await fetch('/auth/relink',{headers:{Accept:'application/json'}}); setTimeout(refreshSpotifyStatus,500); });
         document.getElementById('testWriteBtn').addEventListener('click', async ()=>{
@@ -76,12 +82,38 @@
           btn.textContent='Test Write'; btn.disabled=false;
         });
         document.getElementById('syncBtn').addEventListener('click', async ()=>{
-          const btn = document.getElementById('syncBtn'); btn.textContent='Syncing...'; btn.disabled=true;
+          const btn = document.getElementById('syncBtn');
+          const msgEl = document.getElementById('syncMessage');
+          btn.textContent='Syncing...'; btn.disabled=true;
+          msgEl.textContent = '';
           try{
             const r = await fetch('/api/admin/sync_playlists',{method:'POST',headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify({ direction: 'spotify->redis' })});
             const j = await r.json();
-            if (j.ok) alert('Sync complete: ' + JSON.stringify(j.result)); else alert('Sync failed: '+(j.error||'unknown'));
-          }catch(e){ alert('Sync error: '+e.message); }
+            if (j.ok) {
+              // display counts and optionally list track titles; include Spotify total if available
+              let text = 'Sync complete:';
+              if(j.result.requests) {
+                text += ` requests=${j.result.requests.syncedCount}` +
+                        (j.result.requests.spotifyTotal != null ? `/${j.result.requests.spotifyTotal}` : '');
+                if(j.result.requests.spotifyTotal != null && j.result.requests.syncedCount !== j.result.requests.spotifyTotal) {
+                  console.warn('requests sync count mismatch', j.result.requests);
+                }
+              }
+              if(j.result.live) {
+                text += ` live=${j.result.live.syncedCount}` +
+                        (j.result.live.spotifyTotal != null ? `/${j.result.live.spotifyTotal}` : '');
+                if(j.result.live.spotifyTotal != null && j.result.live.syncedCount !== j.result.live.spotifyTotal) {
+                  console.warn('live sync count mismatch', j.result.live);
+                }
+              }
+              msgEl.textContent = text;
+            } else {
+              msgEl.textContent = 'Sync failed: ' + (j.error||'unknown');
+            }
+            // ask server for fresh data in case socket events were missed
+            socket.emit('get_requests');
+            socket.emit('get_live');
+          }catch(e){ msgEl.textContent = 'Sync error: '+e.message; }
           btn.textContent='Sync Playlists (Spotify → Redis)'; btn.disabled=false;
         });
       } catch (e){ el.innerHTML = '<div class="muted">Error checking Spotify status</div>'; }
