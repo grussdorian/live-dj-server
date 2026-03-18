@@ -60,12 +60,16 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// Serve core pages with friendly routes
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'index.html')));
-// removed dedicated /live page; live playlist shown on landing page now
+// Routes: root redirects to About (now the landing page)
+app.get('/', (req, res) => res.redirect('/about'));
+// Previous landing page is now served at /dj
+app.get('/dj', (req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'index.html')));
+// Admin page (devs only)
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'admin.html')));
-// About page
+// About page (new landing)
 app.get('/about', (req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'about.html')));
+// Bio page
+app.get('/bio', (req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'bio.html')));
 
 // Admin auth using JWT stored in an HttpOnly cookie
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
