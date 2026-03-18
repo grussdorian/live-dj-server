@@ -79,3 +79,32 @@ button{background:var(--accent);border:none;color:#fff;padding:10px 14px;border-
 .about-sprite-inline{margin-top:8px;text-align:center}
 .about-sprite-inline img{max-width:220px;height:auto;image-rendering:pixelated;border-radius:6px}
 @media(max-width:460px){.about-sprite-inline img{max-width:160px}}
+
+/* Bio page theme (scoped under body.bio) */
+body.bio{background-color:#1a1a1a;color:#d0d0d0;font-family:'Retropix',sans-serif;padding:0}
+body.bio .container{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;background-color:#252525;min-height:100vh;padding:0}
+body.bio .header{display:flex;justify-content:space-between;align-items:flex-start;padding:20px;border-bottom:1px solid #3a3a3a}
+body.bio .bio{flex:1;max-width:500px;font-size:16px}
+body.bio .bio h1{color:#a0a0ff;margin:0 0 10px 0;font-size:24px}
+body.bio .photo{margin-left:20px}
+body.bio .photo img{border-radius:5px;max-width:150px}
+/* keep the purple border only for non-logo personal photos */
+body.bio .photo img:not(.logo){border:2px solid #a0a0ff}
+
+/* logo variant: remove border and match bio image height */
+.photo img.logo{border:none;max-height:150px;width:auto;display:block}
+body.bio .main-content{display:flex;flex:1}
+body.bio .sidebar{width:250px;background-color:#2d2d2d;padding:20px;border-right:1px solid #3a3a3a;overflow-y:auto}
+body.bio .content-area{flex:1;padding:20px;background-color:#252525;overflow-y:auto}
+body.bio .collapsible{background-color:transparent;color:#d0d0d0;cursor:pointer;padding:10px;width:100%;border:none;text-align:left;outline:none;font-family:'Retropix',sans-serif;font-size:14px;border-bottom:1px solid #3a3a3a;display:block}
+body.bio .collapsible:hover{color:#a0a0ff}
+body.bio .collapsible.active{color:#a0a0ff;font-weight:bold}
+body.bio .content{display:none;padding:15px;background-color:#2d2d2d;margin:10px 0;border-left:3px solid #a0a0ff}
+body.bio .fheya-banner{background-color:#3a3a3a;color:#d0d0d0;padding:15px;text-align:center;margin:20px 0;border:1px solid #a0a0ff;border-radius:3px;font-size:14px}
+body.bio .manifest{background-color:#2d2d2d;padding:15px;border-left:3px solid #a0a0ff;margin:10px 0;font-size:14px}
+body.bio a{color:#a0a0ff}
+
+@media(max-width:760px){
+  body.bio .sidebar{display:none}
+  body.bio .container{padding:12px}
+}

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hardik Ghoshal - Bio</title>
+    <link href="https://fonts.cdnfonts.com/css/retropix" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #d0d0d0;
+            font-family: 'Retropix', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background-color: #252525;
+            min-height: 100vh;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 20px;
+            border-bottom: 1px solid #3a3a3a;
+        }
+        .bio {
+            flex: 1;
+            max-width: 500px;
+            font-size: 16px;
+        }
+        .bio h1 {
+            color: #a0a0ff;
+            margin: 0 0 10px 0;
+            font-size: 24px;
+        }
+        .photo {
+            margin-left: 20px;
+        }
+        .photo img {
+            border-radius: 5px;
+            border: 2px solid #a0a0ff;
+            max-width: 150px;
+        }
+        .main-content {
+            display: flex;
+            flex: 1;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-right: 1px solid #3a3a3a;
+            overflow-y: auto;
+        }
+        .content-area {
+            flex: 1;
+            padding: 20px;
+            background-color: #252525;
+            overflow-y: auto;
+        }
+        .collapsible {
+            background-color: transparent;
+            color: #d0d0d0;
+            cursor: pointer;
+            padding: 10px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-family: 'Retropix', sans-serif;
+            font-size: 14px;
+            border-bottom: 1px solid #3a3a3a;
+            display: block;
+        }
+        .collapsible:hover {
+            color: #a0a0ff;
+        }
+        .collapsible.active {
+            color: #a0a0ff;
+            font-weight: bold;
+        }
+        .content {
+            display: none;
+            padding: 15px;
+            background-color: #2d2d2d;
+            margin: 10px 0;
+            border-left: 3px solid #a0a0ff;
+        }
+        a {
+            color: #a0a0ff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .fheya-banner {
+            background-color: #3a3a3a;
+            color: #d0d0d0;
+            padding: 15px;
+            text-align: center;
+            margin: 20px 0;
+            border: 1px solid #a0a0ff;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+        .manifest {
+            background-color: #2d2d2d;
+            padding: 15px;
+            border-left: 3px solid #a0a0ff;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .manifest h3, .manifest h4 {
+            color: #a0a0ff;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="bio">
+                <h1>Hardik Ghoshal</h1>
+                <p>Free-time DJ, Guitarist and Photographer, Full-time developer. Runs a VPN at home because privacy is not a feature, it's a lifestyle. Currently building secure time and privacy-preserving love.</p>
+            </div>
+            <div style="margin-left:20px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+                <nav style="font-size:14px;color:#d0d0d0">
+                    <a href="/about">About</a> · <a href="/dj">Live DJ</a> · <a href="/bio">Bio</a>
+                </nav>
+                <div class="photo">
+                    <img src="/img/my-image.jpg" alt="My photo (snap! not loaded)">
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <button class="collapsible" data-target="personal-info">📧 Personal Info</button>
+                <button class="collapsible" data-target="thesis">🎓 Thesis</button>
+                <button class="collapsible" data-target="employment">💼 Employment</button>
+                <button class="collapsible" data-target="education">🎓 Education</button>
+                <button class="collapsible" data-target="publications">📝 Publications</button>
+                <button class="collapsible" data-target="projects">🚀 Projects</button>
+                <button class="collapsible" data-target="languages">🗣️ Languages</button>
+                <button class="collapsible" data-target="skills">💻 Skills</button>
+                <button class="collapsible" data-target="fheya">🔥 Fheya</button>
+            </div>
+
+            <div class="content-area">
+                <div id="personal-info" class="content">
+                    <h2>Personal Info</h2>
+                    <p><strong>Email:</strong> <a href="mailto:hardik.ghoshal@mailbox.tu-dresden.de">hardik.ghoshal@mailbox.tu-dresden.de</a></p>
+                    <p><strong>GitHub:</strong> <a href="https://github.com/grussdorian" target="_blank">github.com/grussdorian</a></p>
+                    <p><strong>Google Scholar:</strong> <a href="https://scholar.google.com/citations?user=ftTkXf8AAAAJ" target="_blank">scholar.google.com/citations</a></p>
+                    <p><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/hardik-ghoshal-96a3391b6/" target="_blank">linkedin.com/in/hardik-ghoshal</a></p>
+                    <p><strong>Address:</strong> Dresden, Germany</p>
+                </div>
+
+                <div id="thesis" class="content">
+                    <h2>Thesis</h2>
+                    <h3>True-Time Extension: A Library for Secure and Fault-Tolerant Time Synchronization</h3>
+                    <p>Building a library to make distributed systems tick in sync—securely, fault-tolerantly, and without time-travel paradoxes.</p>
+                </div>
+
+                <div id="employment" class="content">
+                    <h2>Employment History</h2>
+                    <ul>
+                        <li><strong>HZDR:</strong> Student Assistant (2025-2026) – Plasma simulations, distributed ML, and vortex predictions.</li>
+                        <li><strong>TU Dresden | ScaDS.AI:</strong> Research Assistant (2024-Present) – Teaching LLMs, transformers, and distributed training.</li>
+                        <li><strong>IIT Bombay:</strong> Research Intern (2023) – Quadruped robots and brain-computer interfaces.</li>
+                        <li><strong>Indian Statistical Institute:</strong> Research Intern (2022-2023) – Quantum noise reduction.</li>
+                        <li><strong>OTWO DCT:</strong> Intern (2020-2021) – Backend, UML, and REST APIs.</li>
+                    </ul>
+                </div>
+
+                <div id="education" class="content">
+                    <h2>Education</h2>
+                    <ul>
+                        <li><strong>TU Dresden:</strong> MSc in Distributed Systems Engineering (2023-Present).</li>
+                        <li><strong>Ramakrishna Mission Vivekananda ER:</strong> MSc in Computer Science (2021-2023).</li>
+                        <li><strong>Asutosh College:</strong> BSc Honours in Computer Science (2018-2021).</li>
+                    </ul>
+                </div>
+
+                <div id="publications" class="content">
+                    <h2>Publications</h2>
+                    <ul>
+                        <li><strong>EMG-based Quadruped Robot Telemanipulation (2024):</strong> <a href="https://ieeexplore.ieee.org/abstract/document/10466219" target="_blank">IEEE</a></li>
+                        <li><strong>Seamless Trajectory Estimation for Robotic Platforms (2023):</strong> <a href="https://ieeexplore.ieee.org/abstract/document/10324982" target="_blank">IEEE</a></li>
+                    </ul>
+                </div>
+
+                <div id="projects" class="content">
+                    <h2>Projects</h2>
+                    <ul>
+                        <li><strong>Codae:</strong> Fine-tuning LLMs for education. <a href="https://arxiv.org/pdf/2508.08386" target="_blank">arXiv</a></li>
+                        <li><strong>Klartext:</strong> AI-based text simplification. <a href="https://simplifymytext.org/" target="_blank">simplifymytext.org</a></li>
+                        <li><strong>PageRank Search Engine:</strong> Rust + Redis. <a href="https://github.com/grussdorian/search-engine-pagerank" target="_blank">GitHub</a></li>
+                        <li><strong>Pupper:</strong> Quadruped robot with EMG controls. <a href="https://github.com/grussdorian/pupper" target="_blank">GitHub</a></li>
+                        <li><strong>This website!</strong> You can send song requests to the DJ, and the reuested songs directly import to Rekordbox (most popular DJ software on the market) see <a href="/dj">DJ page</a></li>
+                    </ul>
+                </div>
+
+                <div id="languages" class="content">
+                    <h2>Languages</h2>
+                    <ul>
+                        <li><strong>English:</strong> C2 (fluent in all skills).</li>
+                        <li><strong>German:</strong> A2 (learning!).</li>
+                    </ul>
+                </div>
+
+                <div id="skills" class="content">
+                    <h2>Technical Skills</h2>
+                    <p>Python, PyTorch, SQL, NodeJS, FastAPI, Golang (Fheya uses go see <a href="/about">about</a>), Rust (doing my thesis in rust), Verilog and VHDL (yes super fun ik :), Docker, Git, Linux, and more.</p>
+                </div>
+
+                <div id="fheya" class="content">
+                    <div class="fheya-banner">
+                        <h2>🔥 Fheya: Dating, But Without the Creepy Overlords 🔥</h2>
+                    </div>
+                    <div class="manifest">
+                        <h3>Why Fheya?</h3>
+                        <p>Swipe right on love, not on data theft. No selling your secrets, no algorithmic judgment, just real matches.</p>
+                        <h4>Our Rules:</h4>
+                        <ol>
+                            <li><strong>No Data, No Drama:</strong> Your secrets stay yours—encrypted and forgotten.</li>
+                            <li><strong>Matches That Matter:</strong> One or two real matches per week. No ghosting Olympics.</li>
+                            <li><strong>No Paywalls:</strong> We won’t blackmail your emotions.</li>
+                            <li><strong>Fairness > Algorithms:</strong> No rigged matches, just compatibility.</li>
+                            <li><strong>QR Codes > Small Talk:</strong> Verify matches IRL. Earn brownie points for not being a catfish.</li>
+                            <li><strong>Privacy So Tight, Even We Can’t Peek:</strong> Fully Homomorphic Encryption means we never see your data.</li>
+                            <li><strong>No Paradox of Choice:</strong> Less "Hey," more meaningful convos.</li>
+                            <li><strong>Brownie Points for Decency:</strong> Rate your dates. Good karma = better matches.</li>
+                            <li><strong>Matches Expire:</strong> A week to chat, meet, or ghost. No digital clutter.</li>
+                        </ol>
+                        <h4>Join the Revolution <a href="/about">[Learn more]</a></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const coll = document.querySelectorAll(".collapsible");
+        coll.forEach(button => {
+            button.addEventListener("click", function() {
+                // Remove active class from all buttons
+                coll.forEach(btn => btn.classList.remove("active"));
+                // Hide all content
+                document.querySelectorAll(".content").forEach(content => {
+                    content.style.display = "none";
+                });
+                // Show selected content
+                const targetId = this.getAttribute("data-target");
+                document.getElementById(targetId).style.display = "block";
+                // Add active class to clicked button
+                this.classList.add("active");
+            });
+        });
+        // Open the first section by default
+        document.querySelector(".collapsible").click();
+    </script>
+</body>
+</html>

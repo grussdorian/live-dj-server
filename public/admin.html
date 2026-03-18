@@ -7,13 +7,25 @@
   <link rel="stylesheet" href="/style.css">
   <link rel="icon" href="/img/app-icon.png">
 </head>
-<body>
+<body class="bio">
   <div class="container">
-    <div class="card">
-      <div class="topbar">
-        <h2>DJ Admin Panel</h2>
-        <a href="/" class="small muted">View Live</a>
+    <div class="header">
+      <div class="bio">
+        <h1>DJ Admin Panel</h1>
+        <p class="muted">Manage requests and live playlist</p>
       </div>
+      <div style="margin-left:20px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+        <nav style="font-size:14px;color:#d0d0d0"><a href="/about">About</a> · <a href="/dj">Live DJ</a> · <a href="/bio">Bio</a></nav>
+        <div class="photo"><img class="logo app-icon" src="/img/app-icon.png" alt="app icon"></div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="sidebar">
+        <p class="muted">Admin tools: approve, reject, remove tracks and sync playlists.</p>
+      </div>
+
+      <div class="content-area">
       <div id="adminArea">
         <div id="loginBox">
           <p class="muted">Admin login</p>
@@ -36,6 +48,7 @@
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   </div>

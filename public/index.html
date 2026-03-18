@@ -7,34 +7,47 @@
   <link rel="icon" href="/img/app-icon.png">
   <link rel="stylesheet" href="/style.css">
 </head>
-<body>
+<body class="bio">
   <div class="container">
-    <div class="card">
-      <div class="topbar">
-        <h2 class="site-title">fheya</h2>
-        <div class="top-right">
-          <div class="sprite-row" aria-hidden="false">
-            <div class="sprite-item" title="Alice"><img src="/img/alice.png" alt="Alice"/></div>
-            <div class="sprite-item" title="Bob"><img src="/img/bob.png" alt="Bob"/></div>
-            <div class="sprite-item" title="Diana"><img src="/img/diana.png" alt="Diana"/></div>
-          </div>
-          <a href="/about" class="small muted">FUN STUFF :)</a>
+    <div class="header">
+      <div class="bio">
+        <h1 class="site-title">fheya</h1>
+        <p class="muted">Live DJ & song requests</p>
+      </div>
+      <div style="margin-left:20px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+        <nav style="font-size:14px;color:#d0d0d0">
+          <a href="/about">About</a> · <a href="/dj">Live DJ</a> · <a href="/bio">Bio</a>
+        </nav>
+        <div class="photo"><img class="logo app-icon" src="/img/app-icon.png" alt="app icon"></div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="sidebar">
+        <div class="sprite-row" aria-hidden="false">
+          <div class="sprite-item" title="Alice"><img src="/img/alice.png" alt="Alice"/></div>
+          <div class="sprite-item" title="Bob"><img src="/img/bob.png" alt="Bob"/></div>
+          <div class="sprite-item" title="Diana"><img src="/img/diana.png" alt="Diana"/></div>
         </div>
+        <p class="muted" style="margin-top:12px">Paste a Spotify Track URL or ID to request a song for the live set.</p>
+        <p class="muted" style="margin-top:12px">The live playlist is shown on the right and updates in real-time as songs are approved by the dj.</p>
       </div>
 
-      <p class="muted">Paste a Spotify Track URL (or ID)</p>
-      <div class="inputRow">
-        <input id="trackUrl" type="text" placeholder="https://open.spotify.com/track/...">
-        <button id="sendButton">Send</button>
+      <div class="content-area">
+        <p class="muted">Paste a Spotify Track URL (or ID)</p>
+        <div class="inputRow">
+          <input id="trackUrl" type="text" placeholder="https://open.spotify.com/track...">
+          <button id="sendButton">Send</button>
+        </div>
+        <div style="height:12px"></div>
+        <div id="preview"></div>
+        <div style="height:12px"></div>
+        <div id="actions"></div>
+        <p id="msg" class="muted small"></p>
+        <hr style="margin:18px 0;border-color:rgba(255,255,255,0.04)" />
+        <h3 class="small">Live Playlist</h3>
+        <div id="liveList" class="list muted">Loading live playlist...</div>
       </div>
-      <div style="height:12px"></div>
-      <div id="preview"></div>
-      <div style="height:12px"></div>
-      <div id="actions"></div>
-      <p id="msg" class="muted small"></p>
-      <hr style="margin:18px 0;border-color:rgba(255,255,255,0.04)" />
-      <h3 class="small">Live Playlist</h3>
-      <div id="liveList" class="list muted">Loading live playlist...</div>
     </div>
   </div>
   <script src="/socket.io/socket.io.js"></script>

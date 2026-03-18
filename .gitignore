@@ -1,6 +1,6 @@
 .env
 node_modules/
-.DS_Store/
+*.DS_Store*
 dist/
 package-lock.json
 spotify_tokens.json
