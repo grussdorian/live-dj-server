@@ -3,7 +3,7 @@
 }
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;background:linear-gradient(180deg,#05060a 0%,#0b0f14 100%);color:#e6eef3;font-family:Inter,system-ui,Arial,Helvetica,sans-serif;display:flex;align-items:flex-start;justify-content:center;padding:24px}
+body{margin:0;background:#1a1a1a;color:#e6eef3;font-family:Inter,system-ui,Arial,Helvetica,sans-serif;display:flex;align-items:flex-start;justify-content:center;padding:24px}
 .container{max-width:760px;width:100%}
 .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(2,6,23,.6)}
 .center{text-align:center}
@@ -62,7 +62,6 @@ button{background:var(--accent);border:none;color:#fff;padding:10px 14px;border-
 .sprite-item img{width:40px;height:40px;image-rendering:pixelated;display:block;transition:transform .18s ease}
 .sprite-item:hover img{transform:scale(1.12)}
 .sprite-item.lock img{filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}
-
 @media(max-width:460px){.sprite-row{gap:8px}.sprite-item{width:40px;height:40px}.sprite-item img{width:32px;height:32px}}
 
 /* about page scene sprites are larger */
@@ -70,6 +69,10 @@ button{background:var(--accent);border:none;color:#fff;padding:10px 14px;border-
 .about-sprites .sprite-item.scene img{width:88px;height:72px}
 .about-sprites .sprite-item.scene:hover img{transform:scale(1.04)}
 @media(max-width:460px){.about-sprites .sprite-item.scene{width:72px;height:52px}.about-sprites .sprite-item.scene img{width:64px;height:44px}}
+
+/* center small lock sprite in sidebar */
+.about-sprites .sprite-item-small{display:flex;justify-content:center;align-items:center;padding:8px 0}
+.about-sprites .sprite-item-small img{display:block;max-width:56px;height:auto}
 
 /* app icon and instagram */
 .app-icon{width:96px;height:96px;object-fit:contain;display:block;margin:0 auto;image-rendering:pixelated}
@@ -94,7 +97,8 @@ body.bio .photo img:not(.logo){border:2px solid #a0a0ff}
 /* logo variant: remove border and match bio image height */
 .photo img.logo{border:none;max-height:150px;width:auto;display:block}
 body.bio .main-content{display:flex;flex:1}
-body.bio .sidebar{width:250px;background-color:#2d2d2d;padding:20px;border-right:1px solid #3a3a3a;overflow-y:auto}
+/* default narrower sidebar for bio theme */
+body.bio .sidebar{width:200px;background-color:#2d2d2d;padding:20px;border-right:1px solid #3a3a3a;overflow-y:auto}
 body.bio .content-area{flex:1;padding:20px;background-color:#252525;overflow-y:auto}
 body.bio .collapsible{background-color:transparent;color:#d0d0d0;cursor:pointer;padding:10px;width:100%;border:none;text-align:left;outline:none;font-family:'Retropix',sans-serif;font-size:14px;border-bottom:1px solid #3a3a3a;display:block}
 body.bio .collapsible:hover{color:#a0a0ff}
@@ -104,7 +108,18 @@ body.bio .fheya-banner{background-color:#3a3a3a;color:#d0d0d0;padding:15px;text-
 body.bio .manifest{background-color:#2d2d2d;padding:15px;border-left:3px solid #a0a0ff;margin:10px 0;font-size:14px}
 body.bio a{color:#a0a0ff}
 
-@media(max-width:760px){
-  body.bio .sidebar{display:none}
+/* progressive sidebar sizing for various viewports */
+@media (max-width:1024px) {
+  body.bio .sidebar{width:180px;padding:18px}
+}
+@media (max-width:900px) {
+  body.bio .sidebar{width:150px;padding:16px}
+}
+@media (max-width:760px) {
+  body.bio .sidebar{width:120px;padding:12px}
   body.bio .container{padding:12px}
+}
+@media (max-width:480px) {
+  /* hide sidebar on very small screens */
+  body.bio .sidebar{display:none}
 }
