@@ -3,12 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hardik Ghoshal - Bio</title>
+    <title>Bio - Hardik Ghoshal</title>
     <link href="https://fonts.cdnfonts.com/css/retropix" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --accent: #D97C5F;
+            --accent-gold: #E8A76A;
+            --bg-cream: #F9F6F3;
+            --text-dark: #2A2A2A;
+            --muted: #8A8A8A;
+            --border-light: #E8E4E0;
+        }
+        .bio-nav { display: flex; gap: 28px; font-size: 13px; align-items: center; }
+        .bio-nav a { color: var(--muted); text-decoration: none; transition: color 0.3s ease; position: relative; }
+        .bio-nav a::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 2px; background: var(--accent); transition: width 0.3s ease; }
+        .bio-nav a:hover { color: var(--accent); }
+        .bio-nav a:hover::after { width: 100%; }
+        .header-info h1 { font-family: 'Playfair Display', serif; color: var(--accent); margin: 0 0 10px 0; font-size: 32px; font-weight: 700; }
+        .header-info p { color: var(--muted); font-size: 14px; line-height: 1.6; }
         body {
-            background-color: #1a1a1a;
-            color: #d0d0d0;
+            background: linear-gradient(135deg, #FFFFFF 0%, var(--bg-cream) 100%);
+            color: var(--text-dark);
             font-family: 'Retropix', sans-serif;
             line-height: 1.6;
             margin: 0;
@@ -19,7 +35,7 @@
             margin: 0 auto;
             display: flex;
             flex-direction: column;
-            background-color: #252525;
+            background-color: transparent;
             min-height: 100vh;
         }
         .header {
@@ -27,7 +43,13 @@
             justify-content: space-between;
             align-items: flex-start;
             padding: 20px;
-            border-bottom: 1px solid #3a3a3a;
+            border-bottom: 2px solid var(--border-light);
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .header-info {
+            flex: 1;
+            min-width: 300px;
         }
         .bio {
             flex: 1;
@@ -35,17 +57,20 @@
             font-size: 16px;
         }
         .bio h1 {
-            color: #a0a0ff;
+            color: var(--accent);
             margin: 0 0 10px 0;
-            font-size: 24px;
+            font-size: 32px;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
         }
         .photo {
-            margin-left: 20px;
+            margin-left: 0;
         }
         .photo img {
-            border-radius: 5px;
-            border: 2px solid #a0a0ff;
+            border-radius: 12px;
+            border: 3px solid var(--accent);
             max-width: 150px;
+            box-shadow: 0 8px 20px rgba(217, 124, 95, 0.15);
         }
         .main-content {
             display: flex;
@@ -53,89 +78,110 @@
         }
         .sidebar {
             width: 250px;
-            background-color: #2d2d2d;
+            background-color: var(--bg-cream);
             padding: 20px;
-            border-right: 1px solid #3a3a3a;
+            border-right: 2px solid var(--border-light);
             overflow-y: auto;
         }
         .content-area {
             flex: 1;
             padding: 20px;
-            background-color: #252525;
+            background-color: transparent;
             overflow-y: auto;
         }
         .collapsible {
             background-color: transparent;
-            color: #d0d0d0;
+            color: var(--text-dark);
             cursor: pointer;
-            padding: 10px;
+            padding: 12px;
             width: 100%;
             border: none;
             text-align: left;
             outline: none;
             font-family: 'Retropix', sans-serif;
             font-size: 14px;
-            border-bottom: 1px solid #3a3a3a;
+            border-bottom: 1px solid var(--border-light);
             display: block;
+            transition: all 0.3s ease;
+            font-weight: 500;
         }
         .collapsible:hover {
-            color: #a0a0ff;
+            color: var(--accent);
+            background-color: rgba(217, 124, 95, 0.05);
         }
         .collapsible.active {
-            color: #a0a0ff;
+            color: var(--accent);
             font-weight: bold;
+            background-color: rgba(217, 124, 95, 0.08);
         }
         .content {
             display: none;
-            padding: 15px;
-            background-color: #2d2d2d;
+            padding: 20px;
+            background-color: var(--bg-cream);
             margin: 10px 0;
-            border-left: 3px solid #a0a0ff;
+            border-left: 4px solid var(--accent);
+            border-radius: 6px;
         }
         a {
-            color: #a0a0ff;
+            color: var(--accent);
             text-decoration: none;
+            transition: color 0.3s ease;
         }
         a:hover {
-            text-decoration: underline;
+            color: var(--accent-gold);
         }
         .fheya-banner {
-            background-color: #3a3a3a;
-            color: #d0d0d0;
-            padding: 15px;
+            background: linear-gradient(135deg, var(--accent-beige) 0%, rgba(232, 167, 106, 0.1) 100%);
+            color: var(--text-dark);
+            padding: 20px;
             text-align: center;
             margin: 20px 0;
-            border: 1px solid #a0a0ff;
-            border-radius: 3px;
+            border: 2px solid var(--accent-gold);
+            border-radius: 8px;
             font-size: 14px;
         }
         .manifest {
-            background-color: #2d2d2d;
-            padding: 15px;
-            border-left: 3px solid #a0a0ff;
+            background-color: var(--bg-cream);
+            padding: 20px;
+            border-left: 4px solid var(--accent);
             margin: 10px 0;
             font-size: 14px;
+            border-radius: 6px;
         }
         .manifest h3, .manifest h4 {
-            color: #a0a0ff;
+            color: var(--accent);
             margin-top: 15px;
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+        }
+        .fheya-banner h2 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .header { flex-direction: column; }
+            .header-info { flex: 1; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div class="bio">
-                <h1>Hardik Ghoshal</h1>
-                <p>Free-time DJ, Guitarist and Photographer, Full-time developer. Runs a VPN at home because privacy is not a feature, it's a lifestyle. Currently building secure time and privacy-preserving love.</p>
-            </div>
-            <div style="margin-left:20px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
-                <nav style="font-size:14px;color:#d0d0d0">
-                    <a href="/about">About</a> · <a href="/dj">Live DJ</a> · <a href="/bio">Bio</a>
-                </nav>
-                <div class="photo">
-                    <img src="/img/my-image.jpg" alt="My photo (snap! not loaded)">
+            <div class="header-info">
+                <div class="bio">
+                    <h1>Hardik Ghoshal</h1>
+                    <p>Free-time DJ, Guitarist and Photographer, Full-time developer. Runs a VPN at home because privacy is not a feature, it's a lifestyle. Currently building secure time and privacy-preserving love.</p>
+                    <nav class="bio-nav" style="margin-top:16px;">
+                        <a href="/about">About</a>
+                        <a href="/dj">Live DJ</a>
+                        <a href="/bio">Bio</a>
+                    </nav>
                 </div>
+            </div>
+            <div class="photo">
+                <img src="/img/my-image.jpg" alt="My photo (snap! not loaded)">
             </div>
         </div>
 
