@@ -3,25 +3,62 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>fheya</title>
+  <title>fheya - Request a Song</title>
   <link rel="icon" href="/img/app-icon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
 </head>
-<body class="bio">
+<body>
+  <style>
+    body { font-family: 'Sora', 'Inter', system-ui, sans-serif; }
+    .site-title { font-family: 'Playfair Display', serif; color: var(--accent); font-size: 48px; margin: 0; letter-spacing: -0.5px; }
+    .header-nav { display: flex; gap: 28px; font-size: 13px; margin-top: 12px; }
+    .header-nav a { color: var(--muted); text-decoration: none; transition: color 0.3s ease; position: relative; }
+    .header-nav a::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 2px; background: var(--accent); transition: width 0.3s ease; }
+    .header-nav a:hover { color: var(--accent); }
+    .header-nav a:hover::after { width: 100%; }
+    .app-icon-circle { width: 100px; height: 100px; border-radius: 12px; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-gold) 100%); display: flex; align-items: center; justify-content: center; font-size: 48px; box-shadow: 0 12px 32px rgba(217,124,95,0.15); }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 60px; flex-wrap: wrap; }
+    .header-left { flex: 1; min-width: 300px; }
+    .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 16px; }
+    @media (max-width: 768px) { .header { flex-direction: column; align-items: center; text-align: center; } .header-right { align-items: center; } .header-nav { justify-content: center; } }
+  </style>
   <div class="container">
     <div class="header">
-      <div class="bio">
+      <div class="header-left">
         <h1 class="site-title">fheya</h1>
         <p class="muted">Live DJ & song requests</p>
-      </div>
-      <div style="margin-left:20px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
-        <nav style="font-size:14px;color:#d0d0d0">
-          <a href="/about">About</a> · <a href="/dj">Live DJ</a> · <a href="/bio">Bio</a>
+        <nav class="header-nav">
+          <a href="/about">About</a>
+          <a href="/dj">Live DJ</a>
+          <a href="/bio">Bio</a>
         </nav>
-        <div class="photo"><img class="logo app-icon" src="/img/app-icon.png" alt="app icon"></div>
+      </div>
+      <div class="header-right">
+        <div class="app-icon-circle">🔥</div>
       </div>
     </div>
 
+    <style>
+      .main-content { display: grid; grid-template-columns: 220px 1fr; gap: 48px; margin-bottom: 40px; }
+      .sidebar { padding-top: 8px; }
+      .sidebar-label { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; color: var(--accent-gold); margin-bottom: 16px; position: relative; padding-bottom: 12px; }
+      .sidebar-label::after { content: ''; position: absolute; bottom: 0; left: 0; width: 24px; height: 3px; background: var(--accent); border-radius: 2px; }
+      .sidebar-text { font-size: 13px; color: var(--text-muted); line-height: 1.8; }
+      .content-area { }
+      .section-title { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--text-dark); margin: 0 0 12px 0; }
+      .section-desc { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+      .input-section { background: var(--card); border-radius: 12px; padding: 32px; margin-bottom: 40px; border: 1px solid var(--border-light); box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+      .input-group { display: flex; gap: 12px; flex-direction: column; }
+      .input-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); font-weight: 600; margin-bottom: 8px; }
+      .inputRow { display: flex; gap: 8px; align-items: center; }
+      .preview-box { background: var(--bg-cream); border-radius: 12px; padding: 24px; margin-bottom: 40px; border-left: 4px solid var(--accent); }
+      .playlist-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; margin-top: 48px; padding-top: 32px; border-top: 2px solid var(--border-light); }
+      .playlist-header h3 { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; color: var(--text-dark); margin: 0; }
+      .playlist-badge { background: var(--accent-beige); color: var(--accent); font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+      #preview { min-height: 60px; color: var(--muted); font-size: 13px; }
+      @media (max-width: 768px) { .main-content { grid-template-columns: 1fr; gap: 32px; } .sidebar { display: none; } .section-title { font-size: 24px; } .input-section { padding: 24px; } }
+    </style>
     <div class="main-content">
       <div class="sidebar">
         <div class="sprite-row" aria-hidden="false">
@@ -29,23 +66,33 @@
           <div class="sprite-item" title="Bob"><img src="/img/bob.png" alt="Bob"/></div>
           <div class="sprite-item" title="Diana"><img src="/img/diana.png" alt="Diana"/></div>
         </div>
-        <p class="muted" style="margin-top:12px">Paste a Spotify Track URL or ID to request a song for the live set.</p>
-        <p class="muted" style="margin-top:12px">The live playlist is shown on the right and updates in real-time as songs are approved by the dj.</p>
+        <div class="sidebar-label">How It Works</div>
+        <p class="sidebar-text">Paste a Spotify Track URL or ID to request a song for the live set.</p>
+        <p class="sidebar-text" style="margin-top:12px">The live playlist is shown on the right and updates in real-time as songs are approved by the DJ.</p>
       </div>
 
       <div class="content-area">
-        <p class="muted">Paste a Spotify Track URL (or ID)</p>
-        <div class="inputRow">
-          <input id="trackUrl" type="text" placeholder="https://open.spotify.com/track...">
-          <button id="sendButton">Send</button>
+        <h2 class="section-title">Request a Song</h2>
+        <p class="section-desc">Share your favorite track and see it added to the live playlist.</p>
+
+        <div class="input-section">
+          <div class="input-group">
+            <label class="input-label" for="trackUrl">Spotify Track URL or ID</label>
+            <div class="inputRow">
+              <input id="trackUrl" type="text" placeholder="https://open.spotify.com/track/... or paste ID">
+              <button id="sendButton">Send</button>
+            </div>
+          </div>
         </div>
-        <div style="height:12px"></div>
-        <div id="preview"></div>
-        <div style="height:12px"></div>
+
+        <div class="preview-box" id="preview"></div>
         <div id="actions"></div>
         <p id="msg" class="muted small"></p>
-        <hr style="margin:18px 0;border-color:rgba(255,255,255,0.04)" />
-        <h3 class="small">Live Playlist</h3>
+
+        <div class="playlist-header">
+          <h3>Live Playlist</h3>
+          <span class="playlist-badge">Real-time</span>
+        </div>
         <div id="liveList" class="list muted">Loading live playlist...</div>
       </div>
     </div>
