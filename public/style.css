@@ -3,7 +3,8 @@
 }
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;background:linear-gradient(135deg, var(--bg) 0%, var(--bg-cream) 100%);color:var(--text-dark);font-family:Inter,system-ui,Arial,Helvetica,sans-serif;display:flex;align-items:flex-start;justify-content:center;padding:24px}
+html{background:linear-gradient(135deg, var(--bg) 0%, var(--bg-cream) 100%);background-attachment:fixed}
+body{margin:0;background:transparent;color:var(--text-dark);font-family:Inter,system-ui,Arial,Helvetica,sans-serif;display:flex;align-items:flex-start;justify-content:center;padding:24px}
 .container{max-width:760px;width:100%}
 .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(0,0,0,.08);border:1px solid var(--border-light)}
 .center{text-align:center}
@@ -89,7 +90,7 @@ button:active{transform:translateY(0)}
 @media(max-width:460px){.about-sprite-inline img{max-width:160px}}
 
 /* Bio page theme (scoped under body.bio) */
-body.bio{background:linear-gradient(135deg, var(--bg) 0%, var(--bg-cream) 100%);color:var(--text-dark);font-family:'Retropix',sans-serif;padding:0}
+body.bio{background:transparent;color:var(--text-dark);font-family:'Retropix',sans-serif;padding:0}
 body.bio .container{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;background-color:transparent;min-height:100vh;padding:0}
 body.bio .header{display:flex;justify-content:space-between;align-items:flex-start;padding:20px;border-bottom:2px solid var(--border-light)}
 body.bio .bio{flex:1;max-width:500px;font-size:16px}

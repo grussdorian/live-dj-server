@@ -159,10 +159,18 @@
             font-weight: 700;
             color: var(--text-dark);
         }
+        .mobile-menu-btn { display: none; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-gold) 100%); border: none; color: white; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.8px; }
+        .mobile-menu-btn:hover { opacity: 0.9; }
+        .mobile-menu { display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-cream); border: 1px solid var(--border-light); border-top: none; border-radius: 0 0 6px 6px; max-height: 400px; overflow-y: auto; z-index: 100; }
+        .mobile-menu.active { display: block; }
+        .mobile-menu button { width: 100%; text-align: left; padding: 12px 16px; border: none; background: transparent; font-family: 'Retropix', sans-serif; font-size: 14px; color: var(--text-dark); cursor: pointer; border-bottom: 1px solid var(--border-light); transition: all 0.3s ease; }
+        .mobile-menu button:hover { background-color: rgba(217, 124, 95, 0.05); color: var(--accent); }
+        .mobile-menu button.active { background-color: rgba(217, 124, 95, 0.1); color: var(--accent); font-weight: bold; }
         @media (max-width: 768px) {
             .sidebar { display: none; }
             .header { flex-direction: column; }
             .header-info { flex: 1; }
+            .mobile-menu-btn { display: inline-block; margin-top: 12px; }
         }
     </style>
 </head>
@@ -182,6 +190,21 @@
             </div>
             <div class="photo">
                 <img src="/img/my-image.jpg" alt="My photo (snap! not loaded)">
+            </div>
+        </div>
+
+        <div style="position: relative; margin-bottom: 20px;">
+            <button class="mobile-menu-btn" id="menuBtn">📋 Sections</button>
+            <div class="mobile-menu" id="mobileMenu">
+                <button data-target="personal-info">📧 Personal Info</button>
+                <button data-target="thesis">🎓 Thesis</button>
+                <button data-target="employment">💼 Employment</button>
+                <button data-target="education">🎓 Education</button>
+                <button data-target="publications">📝 Publications</button>
+                <button data-target="projects">🚀 Projects</button>
+                <button data-target="languages">🗣️ Languages</button>
+                <button data-target="skills">💻 Skills</button>
+                <button data-target="fheya">🔥 Fheya</button>
             </div>
         </div>
 
@@ -293,24 +316,57 @@
     </div>
 
     <script>
+        function openSection(targetId) {
+            // Remove active class from all buttons
+            document.querySelectorAll(".collapsible, .mobile-menu button").forEach(btn => btn.classList.remove("active"));
+            // Hide all content
+            document.querySelectorAll(".content").forEach(content => {
+                content.style.display = "none";
+            });
+            // Show selected content
+            document.getElementById(targetId).style.display = "block";
+            // Add active class to all buttons with this target
+            document.querySelectorAll(`[data-target="${targetId}"]`).forEach(btn => btn.classList.add("active"));
+        }
+
+        // Desktop sidebar buttons
         const coll = document.querySelectorAll(".collapsible");
         coll.forEach(button => {
             button.addEventListener("click", function() {
-                // Remove active class from all buttons
-                coll.forEach(btn => btn.classList.remove("active"));
-                // Hide all content
-                document.querySelectorAll(".content").forEach(content => {
-                    content.style.display = "none";
-                });
-                // Show selected content
                 const targetId = this.getAttribute("data-target");
-                document.getElementById(targetId).style.display = "block";
-                // Add active class to clicked button
-                this.classList.add("active");
+                openSection(targetId);
             });
         });
+
+        // Mobile menu buttons
+        const mobileMenuBtns = document.querySelectorAll(".mobile-menu button");
+        mobileMenuBtns.forEach(button => {
+            button.addEventListener("click", function() {
+                const targetId = this.getAttribute("data-target");
+                openSection(targetId);
+                // Close mobile menu after selection
+                document.getElementById("mobileMenu").classList.remove("active");
+            });
+        });
+
+        // Mobile menu toggle
+        const menuBtn = document.getElementById("menuBtn");
+        const mobileMenu = document.getElementById("mobileMenu");
+        if (menuBtn) {
+            menuBtn.addEventListener("click", function() {
+                mobileMenu.classList.toggle("active");
+            });
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener("click", function(event) {
+            if (!event.target.closest(".mobile-menu-btn") && !event.target.closest(".mobile-menu")) {
+                mobileMenu.classList.remove("active");
+            }
+        });
+
         // Open the first section by default
-        document.querySelector(".collapsible").click();
+        openSection("personal-info");
     </script>
 </body>
 </html>
