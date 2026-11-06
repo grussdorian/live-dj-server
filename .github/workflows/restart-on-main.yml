@@ -18,14 +18,40 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Copy env file
+      - name: Write .env from repository secrets
+        env:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          USER_ID: ${{ secrets.USER_ID }}
+          PORT: ${{ secrets.PORT }}
+          RATE_LIMIT: ${{ secrets.RATE_LIMIT }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+          SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+          SPOTIFY_REDIRECT_URI: ${{ secrets.SPOTIFY_REDIRECT_URI }}
+          PLAYLIST_REQUESTS_ID: ${{ secrets.PLAYLIST_REQUESTS_ID }}
+          PLAYLIST_LIVE_ID: ${{ secrets.PLAYLIST_LIVE_ID }}
+          ADMIN_USER: ${{ secrets.ADMIN_USER }}
+          ADMIN_PASS: ${{ secrets.ADMIN_PASS }}
+          ADMIN_JWT_SECRET: ${{ secrets.ADMIN_JWT_SECRET }}
         run: |
-          if [ -f /env/live-dj-server/.env ]; then
-            cp /env/live-dj-server/.env .env
-            echo ".env copied"
-          else
-            echo "No env file to copy at /env/live-dj-server/.env"
-          fi
+          # Spotify refresh token lives outside the checkout so `git clean` on deploy can't delete it
+          TOKEN_DIR="$HOME/.live-dj-server"
+          mkdir -p "$TOKEN_DIR" && chmod 700 "$TOKEN_DIR"
+
+          umask 077
+          : > .env
+          for key in ACCESS_TOKEN USER_ID PORT RATE_LIMIT REDIS_PASSWORD \
+                     SPOTIFY_CLIENT_ID SPOTIFY_CLIENT_SECRET SPOTIFY_REDIRECT_URI \
+                     PLAYLIST_REQUESTS_ID PLAYLIST_LIVE_ID ADMIN_USER ADMIN_PASS ADMIN_JWT_SECRET; do
+            value="${!key}"
+            if [ -n "$value" ]; then
+              printf '%s=%s\n' "$key" "$value" >> .env
+            else
+              echo "::warning::Secret $key is not set"
+            fi
+          done
+          printf 'NODE_ENV=production\nSPOTIFY_TOKEN_FILE=%s\n' "$TOKEN_DIR/spotify_tokens.json" >> .env
+          echo ".env written"
 
       - name: Install dependencies
         run: npm install
@@ -34,13 +60,9 @@ jobs:
 
       - name: Restart server with PM2
         run: |
-          if npx pm2 list | grep -q "live-dj-server"; then
-            echo "Restarting existing PM2 process..."
-            npx pm2 restart live-dj-server
-          else
-            echo "Starting new PM2 process..."
-            npx pm2 start src/server.js --name live-dj-server --watch --ignore-watch="node_modules"
-          fi
+          # Delete + start (not restart) so pm2 runs this runner's checkout, not a path from an older runner
+          npx pm2 delete live-dj-server 2>/dev/null || true
+          npx pm2 start src/server.js --name live-dj-server
           npx pm2 save
         env:
           NODE_ENV: production

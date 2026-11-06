@@ -114,15 +114,20 @@ app.get('/api/admin/me', (req, res) => {
 // Helpers: Spotify authorization and API helpers
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
-let SPOTIFY_REFRESH_TOKEN = process.env.SPOTIFY_REFRESH_TOKEN; // set after initial OAuth or loaded from token file
-const tokenFile = path.join(__dirname, '..', 'spotify_tokens.json');
-// load persisted refresh token if present
-if (!SPOTIFY_REFRESH_TOKEN && fs.existsSync(tokenFile)) {
+// Keep the token file outside the deploy checkout in production (SPOTIFY_TOKEN_FILE) —
+// CI's checkout runs `git clean -ffdx`, which deletes an in-repo token file on every push.
+const tokenFile = process.env.SPOTIFY_TOKEN_FILE || path.join(__dirname, '..', 'spotify_tokens.json');
+// The persisted file wins over .env: it holds the newest token (from OAuth or rotation),
+// while the .env value goes stale as soon as Spotify issues a new one.
+let SPOTIFY_REFRESH_TOKEN;
+if (fs.existsSync(tokenFile)) {
 	try {
 		const jf = JSON.parse(fs.readFileSync(tokenFile, 'utf8'));
 		if (jf && jf.refresh_token) SPOTIFY_REFRESH_TOKEN = jf.refresh_token;
-	} catch (e) { console.warn('Failed to read spotify_tokens.json', e); }
+	} catch (e) { console.warn('Failed to read', tokenFile, e); }
 }
+if (!SPOTIFY_REFRESH_TOKEN) SPOTIFY_REFRESH_TOKEN = process.env.SPOTIFY_REFRESH_TOKEN;
+console.log('[Spotify] Token file:', tokenFile, '| refresh token source:', SPOTIFY_REFRESH_TOKEN ? (SPOTIFY_REFRESH_TOKEN === process.env.SPOTIFY_REFRESH_TOKEN ? '.env' : 'token file') : 'none');
 const PLAYLIST_REQUESTS = process.env.PLAYLIST_REQUESTS_ID || process.env.ISC_SONG_REQUESTS_PLAYLIST_ID;
 const PLAYLIST_LIVE = process.env.PLAYLIST_LIVE_ID || process.env.ISC_LIVE_PLAYLIST_ID;
 console.log('[Config] PLAYLIST_REQUESTS=', PLAYLIST_REQUESTS, 'PLAYLIST_LIVE=', PLAYLIST_LIVE);
@@ -156,13 +161,14 @@ async function getSpotifyAccessToken() {
 		const data = await res.json();
 		if (!data.access_token) {
 			console.error('[Spotify] Failed to refresh user token:', JSON.stringify(data));
+			if (data.error === 'invalid_grant') console.error('[Spotify] Refresh token was revoked or replaced — re-link via /auth/spotify');
 			throw new Error('Failed to refresh access token: ' + JSON.stringify(data));
 		}
 		console.log('[Spotify] Got USER token. Scopes:', data.scope);
 		// Spotify may rotate refresh tokens
 		if (data.refresh_token && data.refresh_token !== SPOTIFY_REFRESH_TOKEN) {
 			SPOTIFY_REFRESH_TOKEN = data.refresh_token;
-			try { fs.writeFileSync(tokenFile, JSON.stringify({ refresh_token: data.refresh_token, scope: data.scope, obtainedAt: Date.now() }, null, 2)); } catch (e) {}
+			try { fs.writeFileSync(tokenFile, JSON.stringify({ refresh_token: data.refresh_token, scope: data.scope, obtainedAt: Date.now() }, null, 2)); } catch (e) { console.warn('[Spotify] Failed to persist rotated refresh token', e); }
 		}
 		_userToken = data.access_token;
 		_userTokenExpiry = Date.now() + ((data.expires_in || 3600) - 120) * 1000;
