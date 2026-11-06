@@ -58,18 +58,15 @@ redis.on('error', (err) => console.error('Redis Client Error', err));
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use(express.static(path.join(__dirname, '..', 'public'), { index: false }));
 
-// Routes: root redirects to About (now the landing page)
-app.get('/', (req, res) => res.redirect('/about'));
-// Previous landing page is now served at /dj
+// Routes: root goes to the song-request page
+app.get('/', (req, res) => res.redirect('/dj'));
 app.get('/dj', (req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'index.html')));
 // Admin page (devs only)
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'admin.html')));
-// About page (new landing)
-app.get('/about', (req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'about.html')));
-// Bio page
-app.get('/bio', (req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'bio.html')));
+// About lives on the main Fheya site
+app.get('/about', (req, res) => res.redirect('https://fheya.de'));
 
 // Admin auth using JWT stored in an HttpOnly cookie
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';

@@ -48,7 +48,7 @@ if(document.getElementById('trackUrl')){
     }
     // client-side dedupe: if recently sent, do not resend
     if (currentTrack && isRecentlySent(currentTrack.id)){
-      msg.textContent = 'Already requested recently';
+      msg.textContent = '// already requested · give it a minute';
       // clear preview/input to avoid loops
       preview.innerHTML = '';
       if (urlInput) urlInput.value = '';
@@ -57,20 +57,11 @@ if(document.getElementById('trackUrl')){
     }
     sending = true;
     sendButton.disabled = true;
-    msg.textContent = 'Sending...';
+    msg.textContent = '// sending…';
     try{
       const r = await api('/api/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uri:currentTrack.uri})});
       if(r.ok){
-        msg.textContent='Sent!';
-        const funLink = document.querySelector('.topbar a');
-        if(funLink){
-          funLink.style.display = 'inline-block';
-          funLink.classList.add('fun-link');
-          // add glowing sparkles immediately after send
-          funLink.classList.add('fun-glow');
-          // persist visibility and glow state across navigation
-          try{ localStorage.setItem('funVisible','1'); localStorage.setItem('funGlow','1'); }catch(e){}
-        }
+        msg.textContent='// sent · the DJ will take a look';
         // clear preview (album art disappears) after send
         preview.innerHTML = '';
         // clear input to avoid re-validation loop
@@ -94,7 +85,7 @@ if(document.getElementById('trackUrl')){
     const raw = urlInput.value || '';
     const url = sanitizeInput(raw);
     if(!url) return;
-    preview.innerHTML='Loading...'; actions.innerHTML=''; msg.textContent='';
+    preview.innerHTML=''; actions.innerHTML=''; msg.textContent='// looking it up…';
     const res = await api('/api/validate?url='+encodeURIComponent(url));
     if(!res.ok){ preview.innerHTML=''; msg.textContent=res.error||'Invalid'; currentTrack = null; return }
     const t = res.track;
@@ -108,7 +99,7 @@ if(document.getElementById('trackUrl')){
     }
     // if this track was just sent, don't schedule another send
     if (isRecentlySent(currentTrack.id)){
-      msg.textContent = 'Already requested recently';
+      msg.textContent = '// already requested · give it a minute';
       sendButton.disabled = false;
       return;
     }
@@ -117,7 +108,7 @@ if(document.getElementById('trackUrl')){
     // set a 3s countdown before auto-sending; show simple message and disable send button
     if (!suppressAutoSend) {
       let countdown = 3;
-      msg.textContent = 'Sending...';
+      msg.textContent = '// sending…';
       sendButton.disabled = true;
       countdownInterval = setInterval(()=>{ countdown -= 1; if (countdown <= 0) { clearInterval(countdownInterval); countdownInterval = null; } }, 1000);
       pendingTimer = setTimeout(async ()=>{
@@ -165,7 +156,7 @@ if(typeof io !== 'undefined'){
     const container = document.getElementById('liveList');
     if(!container) return;
     container.innerHTML='';
-    if(!list || list.length===0){ container.innerHTML='<div class="muted">No songs yet</div>'; return }
+    if(!list || list.length===0){ container.innerHTML='<div class="caption">// nothing on air yet · be the first request</div>'; return }
     list.forEach(item=>{
       const el = document.createElement('div'); el.className='item';
       el.innerHTML = `<div class="thumb" style="background-image:url(${item.track.albumImage});background-size:cover"></div><div class="meta"><div><strong>${item.track.title}</strong></div><div class="muted small">${item.track.artists}</div></div>`;

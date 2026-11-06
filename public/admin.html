@@ -3,55 +3,68 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>DJ Admin</title>
+  <title>Fheya · DJ admin</title>
+  <link rel="icon" href="/img/logo.png">
   <link rel="stylesheet" href="/style.css">
-  <link rel="icon" href="/img/app-icon.png">
+  <style>
+    .admin-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+    .login-box { max-width: 380px; }
+    .login-box input + input { margin-top: 12px; }
+    #spotifyStatus .row { font-size: 14px; }
+    #spotifyStatus .row strong { font-family: var(--font-label); font-weight: normal; text-transform: uppercase; letter-spacing: .03em; }
+    .warn { color: var(--error); }
+    @media (max-width: 720px) { .admin-cols { grid-template-columns: 1fr; } }
+  </style>
 </head>
-<body class="bio">
-  <div class="container">
-    <div class="header">
-      <div class="bio">
-        <h1>DJ Admin Panel</h1>
-        <p class="muted">Manage requests and live playlist</p>
-      </div>
-      <div style="margin-left:20px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
-        <nav style="font-size:14px;color:#d0d0d0"><a href="/about">About</a> · <a href="/dj">Live DJ</a> · <a href="/bio">Bio</a></nav>
-        <div class="photo"><img class="logo app-icon" src="/img/app-icon.png" alt="app icon"></div>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/dj"><img src="/img/logo.png" alt="Fheya"></a>
+      <nav class="topnav">
+        <a href="/dj">Live DJ</a>
+        <a href="/admin" aria-current="page">Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <span class="roman-tab">ii</span>
+    <p class="pretitle" style="margin-top:22px">backstage</p>
+    <h1 class="headline"><span>DJ</span><span class="line-2">admin.</span></h1>
+
+    <div id="adminArea">
+      <section id="loginBox" class="panel-dark login-box">
+        <label class="field-label" for="adminUser">Admin login</label>
+        <input id="adminUser" type="text" placeholder="user" value="admin" autocomplete="username" />
+        <input id="adminPass" type="password" placeholder="password" autocomplete="current-password" />
+        <div style="margin-top:18px"><button id="loginBtn">Sign in →</button></div>
+      </section>
+
+      <div id="panel" style="display:none">
+        <div class="btn-row" style="align-items:center">
+          <button id="logoutBtn" class="btn-plain btn-sm">Log out</button>
+          <span class="caption">// approve or reject requests · remove live tracks</span>
+        </div>
+
+        <section class="card" style="margin-top:24px">
+          <h3>Spotify</h3>
+          <div id="spotifyStatus"></div>
+        </section>
+
+        <div class="admin-cols section">
+          <section>
+            <div class="section-head"><div><p class="pretitle">inbox</p><h2>Requests</h2></div></div>
+            <div id="requests" class="list muted">Loading…</div>
+          </section>
+          <section>
+            <div class="section-head"><div><p class="pretitle">on air</p><h2>Live</h2></div></div>
+            <div id="live" class="list numbered muted">Loading…</div>
+          </section>
+        </div>
       </div>
     </div>
+  </main>
 
-    <div class="main-content">
-      <div class="sidebar">
-        <p class="muted">Admin tools: approve, reject, remove tracks and sync playlists.</p>
-      </div>
-
-      <div class="content-area">
-      <div id="adminArea">
-        <div id="loginBox">
-          <p class="muted">Admin login</p>
-          <input id="adminUser" type="text" placeholder="user" value="admin" />
-          <input id="adminPass" type="password" placeholder="password" />
-          <div style="height:8px"></div>
-          <button id="loginBtn">Sign In</button>
-        </div>
-        <div id="panel" style="display:none">
-          <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px"><button id="logoutBtn">Logout</button><div class="muted">Approve, Reject requests or Remove live tracks</div></div>
-          <div id="spotifyStatus" style="margin-bottom:12px"></div>
-          <div style="display:flex;gap:16px">
-            <div style="flex:1">
-              <h3>Requests</h3>
-              <div id="requests" class="list muted">Loading...</div>
-            </div>
-            <div style="flex:1">
-              <h3>Live</h3>
-              <div id="live" class="list muted">Loading...</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      </div>
-    </div>
-  </div>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/app.js"></script>
   <script>
@@ -65,56 +78,55 @@
     async function showPanel(){ document.getElementById('loginBox').style.display='none'; document.getElementById('panel').style.display='block'; socket.emit('get_requests'); socket.emit('get_live'); await refreshSpotifyStatus(); }
 
     async function refreshSpotifyStatus(){
-      const el = document.getElementById('spotifyStatus'); el.innerHTML = 'Checking Spotify...';
+      const el = document.getElementById('spotifyStatus'); el.innerHTML = '<p class="caption">// checking spotify…</p>';
       try {
         const r = await fetch('/api/spotify/status'); const j = await r.json();
-        if(!j.ok){ el.innerHTML = '<div class="muted">Spotify status unavailable</div>'; return }
+        if(!j.ok){ el.innerHTML = '<p class="caption">// spotify status unavailable</p>'; return }
         const linked = j.linked;
         const me = j.me;
         const owner = j.playlistOwner;
         const ownerMatch = j.ownerMatch;
-        el.innerHTML = `<div class="small">Spotify linked: <strong>${linked ? 'Yes' : 'No'}</strong></div>`;
-        if(linked && me){ el.innerHTML += `<div class="small">Authorized as: <strong>${me.display_name||''} (${me.id})</strong></div>`; }
-        if(owner){ el.innerHTML += `<div class="small">Playlist owner: <strong>${owner}</strong></div>`; }
+        el.innerHTML = `<div class="row">Linked: <strong>${linked ? 'Yes' : 'No'}</strong></div>`;
+        if(linked && me){ el.innerHTML += `<div class="row">Authorized as: <strong>${me.display_name||''} (${me.id})</strong></div>`; }
+        if(owner){ el.innerHTML += `<div class="row">Playlist owner: <strong>${owner}</strong></div>`; }
         if(linked && owner){
-          if(ownerMatch) el.innerHTML += `<div class="muted small">Owner matches playlist owner — OK</div>`;
-          else el.innerHTML += `<div class="muted small">Owner mismatch — re-link with playlist owner</div>`;
+          if(ownerMatch) el.innerHTML += `<p class="caption">// account matches playlist owner</p>`;
+          else el.innerHTML += `<p class="caption warn">// owner mismatch · re-link with the playlist owner's account</p>`;
         }
-        el.innerHTML += `<div style="margin-top:8px"><button id="relinkBtn">Re-link Spotify</button> <button id="clearLinkBtn" style="background:#b33">Clear Link</button> <button id="testWriteBtn" style="background:#383">Test Write</button></div>`;
-        el.innerHTML += `<div style="margin-top:8px"><button id="syncBtn" style="background:#2a6">Sync Playlists (Spotify → Redis)</button><div id="syncMessage" class="muted small" style="margin-top:4px"></div></div>`;
+        el.innerHTML += `<div class="btn-row" style="margin-top:16px"><button id="relinkBtn" class="btn-sm">Re-link Spotify</button><button id="clearLinkBtn" class="btn-plain btn-sm">Clear link</button><button id="testWriteBtn" class="btn-plain btn-sm">Test write</button><button id="syncBtn" class="btn-warm btn-sm">Sync Spotify → Redis</button></div><p id="syncMessage" class="caption" style="margin-top:10px"></p>`;
         document.getElementById('relinkBtn').addEventListener('click', ()=>{ window.location.href='/auth/spotify'; });
         document.getElementById('clearLinkBtn').addEventListener('click', async ()=>{ await fetch('/auth/relink',{headers:{Accept:'application/json'}}); setTimeout(refreshSpotifyStatus,500); });
         document.getElementById('testWriteBtn').addEventListener('click', async ()=>{
-          const btn = document.getElementById('testWriteBtn'); btn.textContent='Testing...'; btn.disabled=true;
+          const btn = document.getElementById('testWriteBtn'); btn.textContent='Testing…'; btn.disabled=true;
           try {
             const r = await fetch('/api/spotify/test-add',{credentials:'include'}); const j = await r.json();
-            let msg = j.ok ? '✅ Write test PASSED!' : '❌ Write test FAILED';
-            if(j.results && j.results.steps) msg += '\n' + j.results.steps.map(s=>`${s.ok?'✅':'❌'} ${s.step}: ${s.error||s.status||'ok'}`).join('\n');
+            let msg = j.ok ? 'Write test passed.' : 'Write test failed.';
+            if(j.results && j.results.steps) msg += '\n' + j.results.steps.map(s=>`[${s.ok?'ok':'fail'}] ${s.step}: ${s.error||s.status||'ok'}`).join('\n');
             if(j.results && j.results.responseHeaders) msg += '\nHeaders: ' + JSON.stringify(j.results.responseHeaders);
             alert(msg);
           } catch(e){ alert('Test failed: '+e.message); }
-          btn.textContent='Test Write'; btn.disabled=false;
+          btn.textContent='Test write'; btn.disabled=false;
         });
         document.getElementById('syncBtn').addEventListener('click', async ()=>{
           const btn = document.getElementById('syncBtn');
           const msgEl = document.getElementById('syncMessage');
-          btn.textContent='Syncing...'; btn.disabled=true;
+          btn.textContent='Syncing…'; btn.disabled=true;
           msgEl.textContent = '';
           try{
             const r = await fetch('/api/admin/sync_playlists',{method:'POST',headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify({ direction: 'spotify->redis' })});
             const j = await r.json();
             if (j.ok) {
-              // display counts and optionally list track titles; include Spotify total if available
-              let text = 'Sync complete:';
+              // display counts; include Spotify total if available
+              let text = '// sync complete ·';
               if(j.result.requests) {
-                text += ` requests=${j.result.requests.syncedCount}` +
+                text += ` requests ${j.result.requests.syncedCount}` +
                         (j.result.requests.spotifyTotal != null ? `/${j.result.requests.spotifyTotal}` : '');
                 if(j.result.requests.spotifyTotal != null && j.result.requests.syncedCount !== j.result.requests.spotifyTotal) {
                   console.warn('requests sync count mismatch', j.result.requests);
                 }
               }
               if(j.result.live) {
-                text += ` live=${j.result.live.syncedCount}` +
+                text += ` · live ${j.result.live.syncedCount}` +
                         (j.result.live.spotifyTotal != null ? `/${j.result.live.spotifyTotal}` : '');
                 if(j.result.live.spotifyTotal != null && j.result.live.syncedCount !== j.result.live.spotifyTotal) {
                   console.warn('live sync count mismatch', j.result.live);
@@ -122,15 +134,15 @@
               }
               msgEl.textContent = text;
             } else {
-              msgEl.textContent = 'Sync failed: ' + (j.error||'unknown');
+              msgEl.textContent = '// sync failed · ' + (j.error||'unknown');
             }
             // ask server for fresh data in case socket events were missed
             socket.emit('get_requests');
             socket.emit('get_live');
-          }catch(e){ msgEl.textContent = 'Sync error: '+e.message; }
-          btn.textContent='Sync Playlists (Spotify → Redis)'; btn.disabled=false;
+          }catch(e){ msgEl.textContent = '// sync error · '+e.message; }
+          btn.textContent='Sync Spotify → Redis'; btn.disabled=false;
         });
-      } catch (e){ el.innerHTML = '<div class="muted">Error checking Spotify status</div>'; }
+      } catch (e){ el.innerHTML = '<p class="caption">// error checking spotify status</p>'; }
     }
 
     document.getElementById('loginBtn').addEventListener('click', async ()=>{
@@ -139,6 +151,7 @@
       const r = await fetch('/api/admin/login', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user,pass}), credentials:'include'});
       const j = await r.json(); if (j.ok) { showPanel(); } else alert('Login failed');
     });
+    document.getElementById('adminPass').addEventListener('keyup', e => { if (e.key === 'Enter') document.getElementById('loginBtn').click(); });
     document.getElementById('logoutBtn').addEventListener('click', async ()=>{ await fetch('/api/admin/logout',{method:'POST',credentials:'include'}); checkAuth(); });
 
     socket.on('requests_update', data => renderRequests(data));
@@ -159,12 +172,12 @@
 
     function renderRequests(list){
       const root = document.getElementById('requests'); root.innerHTML='';
-      if(!list || list.length===0){ root.innerHTML='<div class="muted">No requests</div>'; return }
+      if(!list || list.length===0){ root.innerHTML='<div class="caption">// no requests</div>'; return }
       list.forEach(item=>{
         const el = document.createElement('div'); el.className='item';
-        const spotifyNote = (item.spotifyAddedToRequests === false) ? `<div class="muted small">⚠️ Failed to add to Spotify: ${item.spotifyError||'unknown'}</div>` : '';
-        const retryBtn = (item.spotifyAddedToRequests === false) ? `<button onclick="retrySpotify('${item.track.id}')" style="background:#e8a">Retry Spotify</button>` : '';
-        el.innerHTML = `<div class="thumb" style="background-image:url(${item.track.albumImage});background-size:cover"></div><div class="meta"><div><strong>${item.track.title}</strong></div><div class="muted small">${item.track.artists}</div>${spotifyNote}</div><div style="display:flex;flex-direction:column;gap:6px"><button onclick="approve('${item.track.id}')">Approve</button><button onclick="rejectReq('${item.track.id}')" style="background:#b33">Reject</button>${retryBtn}</div>`;
+        const spotifyNote = (item.spotifyAddedToRequests === false) ? `<div class="caption warn">// not added to spotify · ${item.spotifyError||'unknown'}</div>` : '';
+        const retryBtn = (item.spotifyAddedToRequests === false) ? `<button class="btn-warm btn-sm" onclick="retrySpotify('${item.track.id}')">Retry</button>` : '';
+        el.innerHTML = `<div class="thumb" style="background-image:url(${item.track.albumImage});background-size:cover"></div><div class="meta"><div><strong>${item.track.title}</strong></div><div class="muted small">${item.track.artists}</div>${spotifyNote}</div><div class="item-actions"><button class="btn-sm" onclick="approve('${item.track.id}')">Approve</button><button class="btn-plain btn-sm" onclick="rejectReq('${item.track.id}')">Reject</button>${retryBtn}</div>`;
         root.appendChild(el);
       })
     }
@@ -174,10 +187,10 @@
     }
     function renderLive(list){
       const root = document.getElementById('live'); root.innerHTML='';
-      if(!list || list.length===0){ root.innerHTML='<div class="muted">No live tracks</div>'; return }
+      if(!list || list.length===0){ root.innerHTML='<div class="caption">// no live tracks</div>'; return }
       list.forEach(item=>{
         const el = document.createElement('div'); el.className='item';
-        el.innerHTML = `<div class="thumb" style="background-image:url(${item.track.albumImage});background-size:cover"></div><div class="meta"><div><strong>${item.track.title}</strong></div><div class="muted small">${item.track.artists}</div></div><div><button onclick="removeLive('${item.track.id}')" style="background:#b33">Remove</button></div>`;
+        el.innerHTML = `<div class="thumb" style="background-image:url(${item.track.albumImage});background-size:cover"></div><div class="meta"><div><strong>${item.track.title}</strong></div><div class="muted small">${item.track.artists}</div></div><div class="item-actions"><button class="btn-plain btn-sm" onclick="removeLive('${item.track.id}')">Remove</button></div>`;
         root.appendChild(el);
       })
     }
